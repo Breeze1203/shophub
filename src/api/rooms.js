@@ -8,26 +8,28 @@ export const roomsApi = {
      * 获取房间信息
      * @param {string} roomId - 房间ID
      */
-    getRoomInfo(roomId) {
-        return api.get(`/rooms/${roomId}`);
+    async getRoomInfo(roomId) {
+        return await api.get(`/rooms/${roomId}`);
     },
-
     /**
-     * 更新房间内容
-     * @param {string} roomId - 房间ID
-     * @param {string} content - 内容
+     * 获取房间列表
      */
-    updateRoomContent(roomId, content) {
-        return api.put(`/rooms/${roomId}/content`, { content });
+    async getRoomList() {
+        return await api.get(`/rooms`);
     },
-
     /**
-     * 获取房间在线用户
-     * @param {string} roomType - 房间类型 ('chat' | 'editor' | 'whiteboard')
+     * 校验房间列表
      * @param {string} roomId - 房间ID
      */
-    getOnlineUsers(roomType, roomId) {
-        return api.get(`/${roomType}/${roomId}/online-users`);
+    /**
+     * 尝试加入房间并验证密码
+     * @param {string} roomId - 房间ID
+     * @param {string} password - 用户输入的密码
+     */
+    async joinRoom(roomId, password) {
+        return await api.post(`/rooms/${roomId}/join`, {
+            password: password
+        });
     },
 };
 
@@ -39,8 +41,8 @@ export const chatApi = {
      * 获取聊天历史消息
      * @param {string} roomId - 房间ID
      */
-    getMessages(roomId) {
-        return api.get(`/chat/${roomId}/messages`);
+    async getMessages(roomId) {
+        return await api.get(`/chat/${roomId}/messages`);
     },
 
     /**
