@@ -5,6 +5,14 @@ import api from './http.js';
  */
 export const roomsApi = {
     /**
+     * 创建房间
+     * @param {Object} roomData - 房间创建所需的数据对象
+     */
+    async createRoom(roomData) {
+        // 通常创建是 POST 请求，且是对集合操作（/rooms）
+        return await api.post('/rooms', roomData);
+    },
+    /**
      * 获取房间信息
      * @param {string} roomId - 房间ID
      */

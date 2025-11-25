@@ -86,13 +86,13 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import api from "@/api/http.js";
+import {roomsApi} from "@/api/rooms.js";
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 // 表单数据
-const selectedType = ref('code');
+const selectedType = ref('chat');
 const roomName = ref('');
 const roomDescription = ref('');
 const defaultLanguage = ref('javascript');
@@ -163,8 +163,7 @@ const createRoom = async () => {
     };
 
     // 调用后端 API 创建房间
-    const response = await api.post('/rooms', roomData);
-
+    const response = await roomsApi.createRoom(roomData);
     const createdRoom = response.data;
 
     // 创建成功，跳转到对应的房间
@@ -204,12 +203,6 @@ const createRoom = async () => {
 .room-type-card:hover {
   border-color: #cbd5e1;
   transform: translateY(-2px);
-}
-
-.room-type-card.selected {
-  border-color: #667eea;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .type-icon {
@@ -263,8 +256,7 @@ const createRoom = async () => {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
+   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
   padding-right: 40px;
