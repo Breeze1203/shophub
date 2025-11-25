@@ -3,7 +3,7 @@
     <!-- 顶部工具栏 -->
     <header class="chat-header">
       <div class="header-left">
-        <button @click="$router.push('/dashboard/rooms.js')" class="btn-back">
+        <button @click="router.push('/dashboard/rooms')" class="btn-back">
           ← 返回
         </button>
         <div class="room-info">
@@ -199,10 +199,12 @@
 
 <script setup>
 import {ref, computed, onMounted, onBeforeUnmount, onUnmounted, nextTick, watch} from 'vue';
-import {useRoute, onBeforeRouteLeave} from 'vue-router';
+import {useRoute, onBeforeRouteLeave,} from 'vue-router';
+import router from "@/router/index.js";
 import {useAuthStore} from '@/stores/auth';
 import {useWebSocket} from '@/composables/useWebSocket';
-import api from "@/api/http.js";
+import { useOnlineUsers } from '@/composables/useOnlineUsers';
+import {chatApi, roomsApi} from "@/api/rooms.js";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -222,13 +224,18 @@ const isUnmounting = ref(false);
 const token = localStorage.getItem('access_token');
 const {connect, send, on, disconnect, isConnected} = useWebSocket(roomId, token, 'chat');
 
-// 在线用户
-const onlineUsers = ref([]);
+const {
+  onlineUsers,
+  isLoading: usersLoading,
+  startPolling,
+  refresh: refreshOnlineUsers,
+  cleanup: cleanupOnlineUsers
+} = useOnlineUsers('chat', roomId, 5000);
+
 const typingUsers = ref([]);
 const currentUserId = computed(() => authStore.user?.id);
 
 // 定时器
-let pollingTimer = null;
 let typingTimer = null;
 let isTyping = false;
 
@@ -243,45 +250,7 @@ const emojis = [
   '💯', '✨', '🎉', '🎊', '🎈', '🎁', '🏆', '🔥'
 ];
 
-// ==================== 在线用户管理 ====================
-
-// 从后端获取在线用户列表
-const fetchOnlineUsers = async (type) => {
-  if (isUnmounting.value) return;
-
-  try {
-    const response = await api.get(`/${type}/${roomId}/online-users`);
-    onlineUsers.value = response.data.users || [];
-    console.log('在线用户列表已更新:', onlineUsers.value.length, '人');
-  } catch (error) {
-    console.error('获取在线用户失败:', error);
-  }
-};
-
-// 开始定时轮询
-const startPollingUsers = () => {
-  // 立即获取一次
-  fetchOnlineUsers();
-
-  // 每5秒更新一次
-  pollingTimer = setInterval(() => {
-    fetchOnlineUsers();
-  }, 5000);
-
-  console.log('开始轮询在线用户列表（每5秒）');
-};
-
-// 停止轮询
-const stopPollingUsers = () => {
-  if (pollingTimer) {
-    clearInterval(pollingTimer);
-    pollingTimer = null;
-    console.log('停止轮询在线用户列表');
-  }
-};
-
 // ==================== WebSocket 事件处理 ====================
-
 // 添加系统消息
 const addSystemMessage = (content) => {
   messages.value.push({
@@ -297,9 +266,8 @@ const addSystemMessage = (content) => {
 const handleInit = (payload) => {
   if (isUnmounting.value) return;
   console.log('WebSocket 初始化成功');
-
   // 初始化时也刷新一次在线列表
-  fetchOnlineUsers();
+  refreshOnlineUsers();
 };
 
 // 处理新消息
@@ -315,10 +283,8 @@ const handleMessage = (payload) => {
 const handleUserJoined = (payload) => {
   if (isUnmounting.value) return;
   console.log('用户加入:', payload);
-
   // 立即刷新在线列表
-  fetchOnlineUsers();
-
+  refreshOnlineUsers();
   // 显示系统消息
   if (payload.username && !payload.system_message_sent) {
     addSystemMessage(`${payload.username} 加入了聊天室`);
@@ -329,10 +295,7 @@ const handleUserJoined = (payload) => {
 const handleUserLeft = (payload) => {
   if (isUnmounting.value) return;
   console.log('用户离开:', payload);
-
-  // 立即刷新在线列表
-  fetchOnlineUsers();
-
+  refreshOnlineUsers();
   // 显示系统消息
   if (payload.username && !payload.system_message_sent) {
     addSystemMessage(`${payload.username} 离开了聊天室`);
@@ -524,10 +487,9 @@ const formatTime = (timestamp) => {
 
 onMounted(async () => {
   try {
-    const roomResponse = await api.get(`/rooms/${roomId}`);
+    const roomResponse = roomsApi.getRoomInfo(roomId);
     roomName.value = roomResponse.data.name;
-
-    const messagesResponse = await api.get(`/chat/${roomId}/messages`);
+    const messagesResponse = chatApi.getMessages(roomId);
     messages.value = messagesResponse.data || [];
 
   } catch (error) {
@@ -550,17 +512,15 @@ onMounted(async () => {
   on('error', handleError);
 
   // 开始轮询在线用户
-  startPollingUsers();
+  startPolling();
 });
 
 // 路由离开前清理
 onBeforeRouteLeave((to, from, next) => {
   console.log('准备离开聊天室');
   isUnmounting.value = true;
-
-  // 停止轮询
-  stopPollingUsers();
-
+  // 清理在线用户轮询
+  cleanupOnlineUsers();
   // 发送停止输入状态
   if (isTyping) {
     send('typing', {is_typing: false});
@@ -577,9 +537,7 @@ onBeforeRouteLeave((to, from, next) => {
 onBeforeUnmount(() => {
   console.log('组件开始卸载');
   isUnmounting.value = true;
-
-  stopPollingUsers();
-
+  cleanupOnlineUsers();
   if (isTyping) {
     send('typing', {is_typing: false});
   }
