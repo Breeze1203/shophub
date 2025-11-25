@@ -41,11 +41,12 @@
             <h2>{{ currentPageInfo.label }}</h2>
             <p>{{ currentPageInfo.description }}</p>
           </div>
-
           <div class="content-body">
-            <transition name="fade" mode="out-in">
-              <router-view :key="$route.path" />
-            </transition>
+            <router-view v-slot="{ Component }">
+              <transition name="fade" mode="out-in">
+                <component :is="Component"/>
+              </transition>
+            </router-view>
           </div>
         </div>
       </div>
@@ -54,10 +55,9 @@
 </template>
 
 <script setup>
-import {computed } from 'vue';
-import { useRoute,useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-const router = useRouter();
+import {computed} from 'vue';
+import {useRoute} from 'vue-router';
+import {useAuthStore} from '@/stores/auth';
 const route = useRoute();
 const authStore = useAuthStore();
 const user = computed(() => authStore.user);
@@ -193,9 +193,9 @@ const handleLogout = () => {
 
 /* ===== 主内容区 ===== */
 .main-content {
-  max-width: 1400px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 24px;
+  padding: 14px;
 }
 
 .prototype-container {
@@ -203,7 +203,7 @@ const handleLogout = () => {
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   display: flex;
-  min-height: 600px;
+  min-height: 100%;
   overflow: hidden;
 }
 
@@ -214,27 +214,19 @@ const handleLogout = () => {
   border-right: 1px solid #e9ecef;
 }
 
-.sidebar-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #868e96;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 16px;
-  padding: 0 12px;
-}
-
 .nav-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .nav-item {
   text-decoration: none;
   /* 你可能还需要设置一个颜色，因为链接的默认颜色也可能
      和你的设计不符 */
   color: inherit; /* 举个例子：继承父元素的颜色 */
 }
+
 .nav-item {
   display: flex;
   align-items: center;
@@ -254,11 +246,6 @@ const handleLogout = () => {
   background: rgba(102, 126, 234, 0.08);
 }
 
-.nav-item.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-weight: 600;
-}
 
 .nav-icon {
   font-size: 18px;
@@ -296,14 +283,7 @@ const handleLogout = () => {
   overflow-y: auto;
 }
 
-/* ===== 页面通用样式 ===== */
-/*
-  :deep() 允许父组件的样式穿透到子组件的根元素。
-  我们保留 .page 相关的动画。
-*/
-:deep(.page) {
-  animation: fadeIn 0.3s ease;
-}
+
 
 @keyframes fadeIn {
   from {
@@ -314,22 +294,6 @@ const handleLogout = () => {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* ===== 过渡动画 ===== */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
 }
 
 /* ===== 响应式 (仅布局) ===== */

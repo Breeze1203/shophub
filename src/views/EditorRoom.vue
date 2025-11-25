@@ -81,6 +81,7 @@ import { useRoute, onBeforeRouteLeave } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useWebSocket } from '@/composables/useWebSocket';
 import api from "@/api/http.js";
+import {useOnlineUsers} from "@/composables/useOnlineUsers.js";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -98,8 +99,15 @@ const token = localStorage.getItem('access_token');
 const { connect, send, on, disconnect, isConnected } = useWebSocket(roomId, token, 'chat');
 
 // 在线用户和光标
-const onlineUsers = ref([]);
 const remoteCursors = ref({});
+
+const {
+  onlineUsers,
+  isLoading: usersLoading,
+  startPolling,
+  refresh: refreshOnlineUsers,
+  cleanup: cleanupOnlineUsers
+} = useOnlineUsers('chat', roomId, 5000);
 
 // 定时器
 let pollingTimer = null;
@@ -107,44 +115,7 @@ let autoSaveTimer = null;
 
 // 本地编辑标志
 let isLocalChange = false;
-
-// ==================== 在线用户管理 ====================
-
-// 从后端获取在线用户列表
-const fetchOnlineUsers = async () => {
-  if (isUnmounting.value) return;
-
-  try {
-    const response = await api.get(`/chat/${roomId}/online-users`);
-    onlineUsers.value = response.data.users || [];
-    console.log('在线用户列表已更新:', onlineUsers.value.length, '人');
-  } catch (error) {
-    console.error('获取在线用户失败:', error);
-  }
-};
-
-// 开始定时轮询
-const startPollingUsers = () => {
-  fetchOnlineUsers();
-
-  pollingTimer = setInterval(() => {
-    fetchOnlineUsers();
-  }, 5000);
-
-  console.log('开始轮询在线用户列表（每5秒）');
-};
-
-// 停止轮询
-const stopPollingUsers = () => {
-  if (pollingTimer) {
-    clearInterval(pollingTimer);
-    pollingTimer = null;
-    console.log('停止轮询在线用户列表');
-  }
-};
-
 // ==================== WebSocket 事件处理 ====================
-
 const handleInit = (payload) => {
   if (isUnmounting.value) return;
   console.log('WebSocket 初始化成功');
@@ -153,7 +124,7 @@ const handleInit = (payload) => {
   remoteCursors.value = payload.cursors || {};
 
   // 初始化时刷新在线列表
-  fetchOnlineUsers();
+  refreshOnlineUsers()
 };
 
 const handleOperation = (payload) => {
@@ -178,7 +149,7 @@ const handleUserJoined = (payload) => {
   console.log('用户加入:', payload);
 
   // 立即刷新在线列表
-  fetchOnlineUsers();
+  refreshOnlineUsers()
 };
 
 const handleUserLeft = (payload) => {
@@ -186,7 +157,7 @@ const handleUserLeft = (payload) => {
   console.log('用户离开:', payload);
 
   // 立即刷新在线列表
-  fetchOnlineUsers();
+  refreshOnlineUsers()
 
   // 移除该用户的光标
   delete remoteCursors.value[payload.user_id];
@@ -224,7 +195,7 @@ onMounted(async () => {
   on('error', handleError);
 
   // 开始轮询在线用户
-  startPollingUsers();
+  startPolling()
 });
 
 // 应用远程操作
@@ -332,14 +303,14 @@ watch(code, () => {
   autoSaveTimer = setTimeout(saveCode, 5000);
 });
 
-// ==================== 生命周期 ====================
 
+// ==================== 生命周期 ====================
 // 路由离开前清理
 onBeforeRouteLeave((to, from, next) => {
   console.log('准备离开编辑器房间');
   isUnmounting.value = true;
 
-  stopPollingUsers();
+  cleanupOnlineUsers()
   disconnect();
 
   next();
@@ -350,7 +321,7 @@ onBeforeUnmount(() => {
   console.log('编辑器组件开始卸载');
   isUnmounting.value = true;
 
-  stopPollingUsers();
+  cleanupOnlineUsers()
   disconnect();
 
   if (autoSaveTimer) {

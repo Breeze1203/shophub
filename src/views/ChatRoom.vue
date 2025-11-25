@@ -232,6 +232,7 @@ const {
   cleanup: cleanupOnlineUsers
 } = useOnlineUsers('chat', roomId, 5000);
 
+
 const typingUsers = ref([]);
 const currentUserId = computed(() => authStore.user?.id);
 
@@ -340,7 +341,7 @@ const getAvatarText = (username) => {
 // 根据user_id生成颜色
 const getUserColor = (userId) => {
   const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
-  return colors[(userId || 0) % colors.length];
+  return colors[(userId) % colors.length];
 };
 
 // 按日期分组消息
@@ -487,9 +488,9 @@ const formatTime = (timestamp) => {
 
 onMounted(async () => {
   try {
-    const roomResponse = roomsApi.getRoomInfo(roomId);
+    const roomResponse = await roomsApi.getRoomInfo(roomId);
     roomName.value = roomResponse.data.name;
-    const messagesResponse = chatApi.getMessages(roomId);
+    const messagesResponse = await chatApi.getMessages(roomId);
     messages.value = messagesResponse.data || [];
 
   } catch (error) {
@@ -667,7 +668,7 @@ watch(() => messages.value.length, () => {
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 10px;
   background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
 }
 
@@ -700,7 +701,7 @@ watch(() => messages.value.length, () => {
 }
 
 .messages-list {
-  max-width: 900px;
+  max-width: 90%;
   margin: 0 auto;
 }
 
@@ -1159,7 +1160,7 @@ watch(() => messages.value.length, () => {
   }
 
   .message-content {
-    max-width: 75%;
+    max-width: 90%;
   }
 
   .members-panel {

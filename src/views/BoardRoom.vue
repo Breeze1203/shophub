@@ -3,7 +3,7 @@
     <!-- 顶部工具栏 -->
     <header class="whiteboard-header">
       <div class="header-left">
-        <button @click="$router.push('/dashboard/rooms.js')" class="btn-back">
+        <button @click="$router.push('/dashboard/rooms')" class="btn-back">
           ← 返回
         </button>
         <div class="room-info">
@@ -132,14 +132,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import { useWebSocket } from '@/composables/useWebSocket';
+import {ref, onMounted, onBeforeUnmount, nextTick, computed} from 'vue';
+import {useRoute} from 'vue-router';
+import {useAuthStore} from '@/stores/auth';
+import {useWebSocket} from '@/composables/useWebSocket';
 import api from "@/api/http.js";
+import {useOnlineUsers} from "@/composables/useOnlineUsers.js";
+import {roomsApi} from "@/api/rooms.js";
 
 const route = useRoute();
-const authStore = useAuthStore();
+const isUnmounting = ref(false);
 
 const roomId = route.params.id;
 const roomName = ref('协同画板');
@@ -149,10 +151,15 @@ const ctx = ref(null);
 
 // WebSocket
 const token = localStorage.getItem('access_token');
-const { connect, send, on, isConnected } = useWebSocket(roomId, token, 'board');
+const {connect,disconnect, send, on, isConnected} = useWebSocket(roomId, token, 'board');
+const {
+  onlineUsers,
+  isLoading: usersLoading,
+  startPolling,
+  refresh: refreshOnlineUsers,
+  cleanup: cleanupOnlineUsers
+} = useOnlineUsers('board', roomId, 5000);
 
-// 在线用户
-const onlineUsers = ref([]);
 const remoteCursors = ref({});
 
 // 绘图状态
@@ -162,11 +169,11 @@ const lastY = ref(0);
 
 // 工具配置
 const tools = [
-  { type: 'pen', icon: '✏️', name: '画笔' },
-  { type: 'eraser', icon: '🧹', name: '橡皮擦' },
-  { type: 'line', icon: '📏', name: '直线' },
-  { type: 'rect', icon: '▭', name: '矩形' },
-  { type: 'circle', icon: '○', name: '圆形' },
+  {type: 'pen', icon: '✏️', name: '画笔'},
+  {type: 'eraser', icon: '🧹', name: '橡皮擦'},
+  {type: 'line', icon: '📏', name: '直线'},
+  {type: 'rect', icon: '▭', name: '矩形'},
+  {type: 'circle', icon: '○', name: '圆形'},
 ];
 
 const colors = [
@@ -195,7 +202,7 @@ const tempCanvas = ref(null);
 // 初始化
 onMounted(async () => {
   try {
-    const response = await api.get(`/rooms/${roomId}`);
+    const response = await roomsApi.getRoomInfo(roomId);
     roomName.value = response.data.name;
   } catch (error) {
     console.error('加载房间失败:', error);
@@ -208,8 +215,8 @@ onMounted(async () => {
   // 监听 WebSocket 消息
   on('init', (payload) => {
     console.log('初始化:', payload);
-    onlineUsers.value = payload.users || [];
-
+    if (isUnmounting.value) return;
+    refreshOnlineUsers();
     // 加载已有的画布数据
     if (payload.canvas_data) {
       loadCanvasData(payload.canvas_data);
@@ -231,13 +238,13 @@ onMounted(async () => {
 
   on('user_joined', (payload) => {
     if (payload.users) {
-      onlineUsers.value = payload.users;
+      refreshOnlineUsers();
     }
   });
 
   on('user_left', (payload) => {
     if (payload.users) {
-      onlineUsers.value = payload.users;
+      refreshOnlineUsers();
     }
     delete remoteCursors.value[payload.user_id];
   });
@@ -245,9 +252,13 @@ onMounted(async () => {
   on('clear', () => {
     clearCanvasLocal();
   });
+  startPolling()
 });
 
 onBeforeUnmount(() => {
+  isUnmounting.value = true;
+  cleanupOnlineUsers();
+  disconnect()
   window.removeEventListener('resize', resizeCanvas);
 });
 
@@ -336,7 +347,7 @@ const draw = (e) => {
   if (!isDrawing.value) {
     // 更新光标位置
     const pos = getMousePos(e);
-    send('cursor', { x: pos.x, y: pos.y });
+    send('cursor', {x: pos.x, y: pos.y});
     return;
   }
 
@@ -372,7 +383,7 @@ const stopDrawing = () => {
   if (!isDrawing.value) return;
 
   if (['line', 'rect', 'circle'].includes(currentTool.value)) {
-    const pos = { x: lastX.value, y: lastY.value };
+    const pos = {x: lastX.value, y: lastY.value};
 
     // 发送最终形状
     send('draw', {
@@ -585,8 +596,12 @@ const loadCanvasData = (dataUrl) => {
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .header-right {
@@ -773,8 +788,12 @@ canvas {
 }
 
 @keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.5; }
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0.5;
+  }
 }
 
 .cursor-label {

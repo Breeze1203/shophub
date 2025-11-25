@@ -3,7 +3,7 @@ import {chatApi, editorApi, whiteboardApi } from '@/api/rooms.js';
 
 /**
  * 在线用户管理 Composable
- * @param {string} roomType - 房间类型 ('chat' | 'editor' | 'whiteboard')
+ * @param {string} roomType - 房间类型 ('chat' | 'editor' | 'board')
  * @param {string} roomId - 房间ID
  * @param {number} pollingInterval - 轮询间隔（毫秒），默认5000
  */
@@ -22,7 +22,7 @@ export function useOnlineUsers(roomType, roomId, pollingInterval = 5000) {
                 return chatApi.getOnlineUsers;
             case 'editor':
                 return editorApi.getOnlineUsers;
-            case 'whiteboard':
+            case 'board':
                 return whiteboardApi.getOnlineUsers;
             default:
                 throw new Error(`Unknown room type: ${roomType}`);
@@ -38,7 +38,6 @@ export function useOnlineUsers(roomType, roomId, pollingInterval = 5000) {
         try {
             isLoading.value = true;
             error.value = null;
-
             const apiMethod = getApiMethod();
             const response = await apiMethod(roomId);
 
