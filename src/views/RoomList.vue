@@ -124,7 +124,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import api from "@/api/http.js";
+import {roomsApi} from "@/api/rooms.js";
 
 const router = useRouter();
 
@@ -144,7 +144,7 @@ const loadRooms = async () => {
   error.value = '';
 
   try {
-    const response = await api.get('/rooms');
+    const response = await roomsApi.getRoomList('/rooms');
     rooms.value = response.data;
   } catch (err) {
     console.error('加载房间列表失败:', err);
@@ -171,7 +171,9 @@ const filteredRooms = computed(() => {
         (room.description && room.description.toLowerCase().includes(query))
     );
   }
-
+  if(result==null){
+    return [];
+  }
   return result;
 });
 
@@ -193,10 +195,10 @@ const confirmJoin = async () => {
   }
 
   try {
-    await api.post(`/rooms/${selectedRoom.value.id}/join`, {
-      password: roomPassword.value
-    });
-
+    await roomsApi.joinRoom(
+        selectedRoom.value.id,
+        roomPassword.value
+    );
     showPasswordModal.value = false;
     roomPassword.value = '';
     enterRoom(selectedRoom.value);
@@ -449,11 +451,6 @@ onMounted(() => {
 .badge.privacy {
   background: #e0e7ff;
   color: #3730a3;
-}
-
-.badge.privacy.password {
-  background: #fef3c7;
-  color: #92400e;
 }
 
 .pulse-dot {
