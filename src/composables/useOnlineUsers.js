@@ -1,5 +1,5 @@
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { roomsApi, chatApi, editorApi, whiteboardApi } from '@/api/rooms.js';
+import { ref } from 'vue';
+import {chatApi, editorApi, whiteboardApi } from '@/api/rooms.js';
 
 /**
  * 在线用户管理 Composable
@@ -58,7 +58,6 @@ export function useOnlineUsers(roomType, roomId, pollingInterval = 5000) {
     const startPolling = () => {
         // 立即获取一次
         fetchOnlineUsers();
-
         // 定时轮询
         pollingTimer = setInterval(() => {
             fetchOnlineUsers();
@@ -98,7 +97,6 @@ export function useOnlineUsers(roomType, roomId, pollingInterval = 5000) {
         onlineUsers,
         isLoading,
         error,
-
         // 方法
         fetchOnlineUsers,
         startPolling,
