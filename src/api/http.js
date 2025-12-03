@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {authAPI} from "@/api/auth.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
@@ -31,15 +32,11 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const refreshToken = localStorage.getItem('refresh_token');
-                const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-                    refresh_token: refreshToken,
-                });
-
-                const { access_token, refresh_token } = response.data;
+                const refresh = localStorage.getItem('refresh_token');
+                const data=await authAPI.refreshToken(refresh);
+                const { access_token, refresh_token } = data;
                 localStorage.setItem('access_token', access_token);
                 localStorage.setItem('refresh_token', refresh_token);
-
                 originalRequest.headers.Authorization = `Bearer ${access_token}`;
                 return api(originalRequest);
             } catch (err) {

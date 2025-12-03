@@ -77,7 +77,7 @@ const handleLocalLogin = async () => {
   const result = await authStore.login(email.value, password.value);
 
   if (result.success) {
-    router.push('/dashboard');
+    router.push('/dashboard/home');
   } else {
     error.value = result.error;
   }
@@ -90,7 +90,7 @@ const handleOAuthLogin = async (provider) => {
   error.value = '';
   try {
     await authStore.loginWithOAuth(provider);
-    router.push('/dashboard');
+    router.push('/dashboard/home');
   } catch (err) {
     error.value = err.message || 'OAuth login failed';
   }
@@ -228,18 +228,6 @@ h1 {
 .btn-oauth:hover {
   border-color: #667eea;
   background: #f8f9ff;
-}
-
-.btn-oauth-google:hover {
-  border-color: #ea4335;
-}
-
-.btn-oauth-github:hover {
-  border-color: #333;
-}
-
-.btn-oauth-facebook:hover {
-  border-color: #1877f2;
 }
 
 .signup-link {

@@ -32,13 +32,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
 
 const route = useRoute();
 const loading = ref(true);
 const error = ref('');
 // 从路由参数中获取 provider，并移到 onMounted 外部，以便模板可以访问
 const provider = route.params.provider;
+import {authAPI} from "@/api/auth.js";
 
 // 定义 provider 的 logo 和名称
 const providerDetails = ref({
@@ -62,15 +62,7 @@ onMounted(async () => {
       throw new Error('缺少认证参数');
     }
     // 直接调用后端回调接口获取 token
-    const response = await axios.get(
-        // provider 变量现在从外部获取
-        `http://localhost:8080/api/v1/auth/oauth/${provider}/callback`,
-        {
-          params: { code, state }
-        }
-    );
-    const authData = response.data;
-    console.log(authData);
+    const authData=await authAPI.handleOAuthCallback(provider,code,state);
     // 发送认证数据到父窗口
     if (window.opener) {
       window.opener.postMessage(
@@ -81,9 +73,7 @@ onMounted(async () => {
           window.location.origin
       );
     }
-
     loading.value = false;
-
     // 1秒后自动关闭窗口
     setTimeout(() => {
       window.close();

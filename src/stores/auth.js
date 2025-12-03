@@ -67,10 +67,8 @@ export const useAuthStore = defineStore('auth', () => {
             // 生成随机 state 用于 CSRF 保护
             const state = Math.random().toString(36).substring(7);
             sessionStorage.setItem('oauth_state', state);
-
             // 获取 OAuth URL
             const data = await authAPI.getOAuthURL(provider, state);
-            console.log(data.auth_url);
             // 打开 OAuth 弹窗
             const width = 400;
             const height = 500;
@@ -114,8 +112,7 @@ export const useAuthStore = defineStore('auth', () => {
                         }
 
                         const { authData } = event.data;
-                        const savedState = sessionStorage.getItem('oauth_state');
-
+                        // const savedState = sessionStorage.getItem('oauth_state');
                         // 验证 state（虽然后端已经验证过了）
                         if (authData) {
                             setAuth(authData);
@@ -153,8 +150,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Fetch current user
     const fetchCurrentUser = async () => {
         try {
-            const userData = await authAPI.getCurrentUser();
-            user.value = userData;
+            user.value = await authAPI.getCurrentUser();
             return { success: true };
         } catch (error) {
             return {
