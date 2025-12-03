@@ -187,13 +187,15 @@
                 class="oauth-btn"
             >
               <svg v-if="provider === 'google'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M17.788 5.108A9 9 0 1 0 21 12h-8"></path>
               </svg>
               <svg v-else-if="provider === 'github'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+              <svg v-else-if="provider === 'wechat'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.5 7.5c-3.333-3.333-8.667-3.333-12 0-2.667 2.667-3.333 6.333-2 9.5.667 1.333 1.667 2.333 3 2.833.333.667.333 1.167-.167 1.167-.667 0-1.333-.333-2-.667l-1.333.667c1.333 1 3 1.667 4.5 1.667 3.333 3.333 8.667 3.333 12 0 2.667-2.667 3.333-6.333 2-9.5-.667-1.333-1.667-2.333-3-2.833-.333-.667-.333-1.167.167-1.167.667 0 1.333.333 2 .667l1.333-.667c-1.333-1-3-1.667-4.5-1.667z"/>
+                <path d="M8.833 12.167a1.167 1.167 0 1 0 0-2.334 1.167 1.167 0 0 0 0 2.334z"/>
+                <path d="M15.167 12.167a1.167 1.167 0 1 0 0-2.334 1.167 1.167 0 0 0 0 2.334z"/>
               </svg>
             </button>
           </div>
@@ -252,7 +254,6 @@ const handleOAuthLogin = async (provider) => {
   error.value = '';
   try {
     await authStore.loginWithOAuth(provider);
-    console.log("认证成功")
     router.push('/dashboard/home');
   } catch (err) {
     error.value = err.message || 'OAuth登录失败';

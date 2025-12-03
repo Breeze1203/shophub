@@ -34,19 +34,6 @@
             rows="3"
         ></textarea>
       </div>
-
-      <div class="form-group" v-if="selectedType === 'code'">
-        <label>默认编程语言</label>
-        <select v-model="defaultLanguage" class="select">
-          <option value="javascript">JavaScript</option>
-          <option value="typescript">TypeScript</option>
-          <option value="python">Python</option>
-          <option value="go">Go</option>
-          <option value="java">Java</option>
-          <option value="cpp">C++</option>
-        </select>
-      </div>
-
       <div class="form-group">
         <label>权限设置</label>
         <select v-model="privacy" class="select">
@@ -95,7 +82,6 @@ const authStore = useAuthStore();
 const selectedType = ref('chat');
 const roomName = ref('');
 const roomDescription = ref('');
-const defaultLanguage = ref('javascript');
 const privacy = ref('public');
 const roomPassword = ref('');
 
@@ -106,32 +92,11 @@ const error = ref('');
 // 房间类型配置
 const roomTypes = [
   {
-    id: 'code',
-    name: '代码编辑器',
-    icon: '💻',
-    desc: '实时协作写代码',
-    route: '/editor'
-  },
-  {
-    id: 'whiteboard',
-    name: '白板',
-    icon: '🎨',
-    desc: '可视化头脑风暴',
-    route: '/whiteboard'
-  },
-  {
     id: 'chat',
     name: '聊天室',
     icon: '💬',
     desc: '文字与语音交流',
     route: '/chat'
-  },
-  {
-    id: 'video',
-    name: '视频会议',
-    icon: '📹',
-    desc: '面对面沟通',
-    route: '/video'
   },
 ];
 
@@ -158,7 +123,6 @@ const createRoom = async () => {
       type: selectedType.value,
       privacy: privacy.value,
       password: privacy.value === 'password' ? roomPassword.value : undefined,
-      language: selectedType.value === 'code' ? defaultLanguage.value : undefined,
       owner_id: authStore.user?.id,
     };
 
@@ -185,9 +149,6 @@ const createRoom = async () => {
 }
 
 .room-types {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
   margin-bottom: 32px;
 }
 

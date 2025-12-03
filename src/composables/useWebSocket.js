@@ -1,4 +1,3 @@
-// composables/useWebSocket.js
 import { ref } from 'vue';
 
 export function useWebSocket(roomId, token, wsType) {
@@ -20,7 +19,6 @@ export function useWebSocket(roomId, token, wsType) {
 
         const endpoints = {
             chat: `ws://localhost:8080/api/v1/chat/${roomId}/ws`,
-            board: `ws://localhost:8080/api/v1/board/${roomId}/ws`
         };
         const wsUrl = `${endpoints[wsType]}?token=${token}`;
 

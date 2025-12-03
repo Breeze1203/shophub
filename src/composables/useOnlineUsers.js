@@ -1,5 +1,5 @@
-import { ref } from 'vue';
-import {chatApi, editorApi, whiteboardApi } from '@/api/rooms.js';
+import {ref} from 'vue';
+import {chatApi} from '@/api/rooms.js';
 
 /**
  * 在线用户管理 Composable
@@ -20,10 +20,6 @@ export function useOnlineUsers(roomType, roomId, pollingInterval = 5000) {
         switch (roomType) {
             case 'chat':
                 return chatApi.getOnlineUsers;
-            case 'editor':
-                return editorApi.getOnlineUsers;
-            case 'board':
-                return whiteboardApi.getOnlineUsers;
             default:
                 throw new Error(`Unknown room type: ${roomType}`);
         }

@@ -6,11 +6,9 @@ import OAuthCallback from '@/views/OAuthCallback.vue';
 import Dashboard from '@/views/Dashboard.vue';
 import RoomList from "@/views/RoomList.vue";
 import CreateRoom from "@/views/CreateRoom.vue";
-import EditorRoom from "@/views/EditorRoom.vue";
 import FeaturesPage from "@/views/FeaturesPage.vue";
 import HomePage from "@/views/HomePage.vue";
 import ChatRoom from "@/views/ChatRoom.vue";
-import BoardRoom from "@/views/BoardRoom.vue";
 
 const routes = [
     {
@@ -46,21 +44,9 @@ const routes = [
         redirect: '/dashboard',
     },
     {
-        path: '/editor/:id',
-        name: 'EditorRoom',
-        component: EditorRoom,
-        meta: {requiresAuth: true}
-    },
-    {
         path: '/chat/:id',
         name: 'ChatRoom',
         component: ChatRoom,
-        meta: {requiresAuth: true}
-    },
-    {
-        path: '/whiteboard/:id',
-        name: 'BoardRoom',
-        component: BoardRoom,
         meta: {requiresAuth: true}
     },
 ];
