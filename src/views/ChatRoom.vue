@@ -204,7 +204,7 @@ import router from "@/router/index.js";
 import {useAuthStore} from '@/stores/auth';
 import {useWebSocket} from '@/composables/useWebSocket';
 import { useOnlineUsers } from '@/composables/useOnlineUsers';
-import {chatApi, roomsApi} from "@/api/rooms.js";
+import {chatApi, roomsApi} from "@/api/admin/rooms.js";
 
 const route = useRoute();
 const authStore = useAuthStore();

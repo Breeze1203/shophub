@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {authAPI} from "@/api/auth.js";
+import {authAPI} from "@/api/admin/auth.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 

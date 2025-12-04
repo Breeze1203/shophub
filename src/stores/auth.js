@@ -1,14 +1,16 @@
 import { defineStore } from 'pinia';
-import { authAPI } from '@/api/auth';
+import { authAPI } from '@/api/admin/auth.js';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref(null);
+    const isAdmin = ref(false)
     const accessToken = ref(localStorage.getItem('access_token'));
     const refreshToken = ref(localStorage.getItem('refresh_token'));
     const isAuthenticated = computed(() => !!accessToken.value);
     const availableProviders = ref([]);
+    const isInitialized = ref(false)
 
     const router = useRouter();
 
@@ -62,8 +64,9 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     // OAuth login - opens popup window
-    const loginWithOAuth = async (provider) => {
+    const loginWithOAuth = async (provider,isAdminUser=false) => {
         try {
+            isAdmin.value=isAdminUser;
             // 生成随机 state 用于 CSRF 保护
             const state = Math.random().toString(36).substring(7);
             sessionStorage.setItem('oauth_state', state);
@@ -100,11 +103,9 @@ export const useAuthStore = defineStore('auth', () => {
                 const messageHandler = async (event) => {
                     // 安全检查：确保消息来自正确的源
                     if (event.origin !== window.location.origin) return;
-                    console.log(event.data);
                     if (event.data.type === 'oauth-success') {
                         clearInterval(checkClosed);
                         window.removeEventListener('message', messageHandler);
-
                         try {
                             popup.close();
                         } catch (e) {
@@ -175,9 +176,11 @@ export const useAuthStore = defineStore('auth', () => {
         if (accessToken.value) {
             await fetchCurrentUser();
         }
+        isInitialized.value=true;
     };
 
     return {
+        isAdmin,
         user,
         isAuthenticated,
         availableProviders,
@@ -187,5 +190,6 @@ export const useAuthStore = defineStore('auth', () => {
         logout,
         fetchCurrentUser,
         init,
+        isInitialized
     };
 });

@@ -1,4 +1,4 @@
-import api from './http.js';
+import api from '../base/http.js';
 
 /**
  * 房间相关API

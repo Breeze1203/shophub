@@ -9,6 +9,7 @@ import CreateRoom from "@/views/CreateRoom.vue";
 import FeaturesPage from "@/views/FeaturesPage.vue";
 import HomePage from "@/views/HomePage.vue";
 import ChatRoom from "@/views/ChatRoom.vue";
+import ProductsPage from "@/views/business/ProductsPage.vue";
 
 const routes = [
     {
@@ -22,6 +23,11 @@ const routes = [
         name: 'Register',
         component: Register,
         meta: {requiresGuest: true},
+    },
+    {
+        path: '/products',
+        name: 'products',
+        component: ProductsPage,
     },
     {
         path: '/auth/callback/:provider',
@@ -58,14 +64,32 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
-    const authStore = useAuthStore();
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-        next('/login');
-    } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-        next('/dashboard');
-    } else {
-        next();
+    const authStore = useAuthStore()
+
+    // 等待 authStore 初始化完成
+    if (!authStore.isInitialized) {
+        await authStore.init()
     }
-});
+
+    // 需要登录的页面，但没登录 → 去登录（并带上想去哪）
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+        return next({
+            path: '/login',
+            query: { redirect: to.fullPath }  // 登录后能回来
+        })
+    }
+
+    //  管理员已登录，还想访问登录页 → 直接跳后台（用 replace 防止死循环）
+    if (authStore.isAuthenticated && authStore.isAdmin && to.path === '/login') {
+        return next({ path: '/dashboard', replace: true })
+    }
+
+    // 普通已登录用户访问登录页 → 跳首页
+    if (authStore.isAuthenticated && to.path === '/login') {
+        return next({ path: '/', replace: true })
+    }
+    // 其他情况全部放行
+    next()
+})
 
 export default router;

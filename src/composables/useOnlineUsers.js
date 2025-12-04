@@ -1,5 +1,5 @@
 import {ref} from 'vue';
-import {chatApi} from '@/api/rooms.js';
+import {chatApi} from '@/api/admin/rooms.js';
 
 /**
  * 在线用户管理 Composable

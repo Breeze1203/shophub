@@ -38,7 +38,7 @@ const loading = ref(true);
 const error = ref('');
 // 从路由参数中获取 provider，并移到 onMounted 外部，以便模板可以访问
 const provider = route.params.provider;
-import {authAPI} from "@/api/auth.js";
+import {authAPI} from "@/api/admin/auth.js";
 
 // 定义 provider 的 logo 和名称
 const providerDetails = ref({

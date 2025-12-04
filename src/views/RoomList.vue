@@ -124,7 +124,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import {roomsApi} from "@/api/rooms.js";
+import {roomsApi} from "@/api/admin/rooms.js";
 
 const router = useRouter();
 

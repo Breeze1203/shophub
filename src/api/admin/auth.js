@@ -1,4 +1,4 @@
-import api from "@/api/http.js";
+import api from "@/api/base/http.js";
 
 // Auth API methods
 export const authAPI = {
