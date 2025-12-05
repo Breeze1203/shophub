@@ -131,7 +131,7 @@
         v-if="authStore.isAuthenticated"
         ref="customerServiceRef"
         :user-id="authStore.user.id"
-        :token="token"
+        :token="authStore.accessToken"
     />
   </div>
 </template>
@@ -145,7 +145,6 @@ import BaseButton from "@/views/base/BaseButton.vue";
 import CustomerServiceChat from "@/components/CustomerServiceChat.vue";
 import {useAuthStore} from "@/stores/auth.js";
 const customerServiceRef = ref(null);
-const token = ref(localStorage.getItem('access_token'));
 
 const authStore = useAuthStore();
 // Mock API

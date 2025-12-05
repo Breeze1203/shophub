@@ -230,6 +230,7 @@ export const useAuthStore = defineStore('auth', () => {
         logout,
         fetchCurrentUser,
         init,
+        accessToken,
         isInitialized
     };
 });

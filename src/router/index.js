@@ -10,6 +10,7 @@ import FeaturesPage from "@/views/admin/FeaturesPage.vue";
 import HomePage from "@/views/admin/HomePage.vue";
 import ChatRoom from "@/views/admin/ChatRoom.vue";
 import ProductsPage from "@/views/business/ProductsPage.vue";
+import CustomerService from "@/views/admin/CustomerService.vue";
 
 const routes = [
     {
@@ -43,6 +44,7 @@ const routes = [
             {path: 'create', component: CreateRoom, name: 'CreateRoom', meta: {requiresAuth: true}},
             {path: 'rooms', component: RoomList, name: 'RoomList', meta: {requiresAuth: true}},
             {path: 'features', component: FeaturesPage, name: 'FeaturesPage', meta: {requiresAuth: true}},
+            {path: 'customer', component: CustomerService, name: 'CustomerService', meta: {requiresAuth: true}},
         ]
     },
     {

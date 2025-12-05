@@ -87,6 +87,12 @@ const pages = [
     label: '核心功能',
     icon: '✨',
     description: '产品功能特性展示',
+  },
+  {
+    id: 'customer',
+    label: '客户服务',
+    icon: '✨',
+    description: '在线客户服务功能',
   }
 ];
 
