@@ -4,6 +4,7 @@
         @search="handleSearch"
         @cart-click="showLoginModal"
         @profile-click="showLoginModal"
+        @chat-click="handleCustomerChatClick"
     />
 
     <div class="page-container">
@@ -125,6 +126,13 @@
       </div>
     </transition>
 
+    <!-- 客服聊天组件 -->
+    <CustomerServiceChat
+        v-if="authStore.isAuthenticated"
+        ref="customerServiceRef"
+        :user-id="authStore.user.id"
+        :token="token"
+    />
   </div>
 </template>
 
@@ -134,7 +142,10 @@ import SearchHeader from "@/views/business/SearchHeader.vue";
 import CategoryList from "@/views/business/CategoryList.vue";
 import ProductCard from "@/views/business/ProductCard.vue";
 import BaseButton from "@/views/base/BaseButton.vue";
+import CustomerServiceChat from "@/components/CustomerServiceChat.vue";
 import {useAuthStore} from "@/stores/auth.js";
+const customerServiceRef = ref(null);
+const token = ref(localStorage.getItem('access_token'));
 
 const authStore = useAuthStore();
 // Mock API
@@ -351,6 +362,15 @@ const handleOAuthLogin = async (provider) => {
     hideLoginModal();
   } catch (err) {
     console.log('登录失败')
+  }
+};
+
+// 客服点击事件
+const handleCustomerChatClick = () => {
+  if (!authStore.isAuthenticated) {
+    showLoginModal();
+  } else {
+    customerServiceRef.value?.openChat();
   }
 };
 onMounted(() => {

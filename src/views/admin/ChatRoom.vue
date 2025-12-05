@@ -201,9 +201,9 @@
 import {ref, computed, onMounted, onBeforeUnmount, onUnmounted, nextTick, watch} from 'vue';
 import {useRoute, onBeforeRouteLeave,} from 'vue-router';
 import router from "@/router/index.js";
-import {useAuthStore} from '@/stores/auth';
-import {useWebSocket} from '@/composables/useWebSocket';
-import { useOnlineUsers } from '@/composables/useOnlineUsers';
+import {useAuthStore} from '@/stores/auth.js';
+import {useWebSocket} from '@/composables/useWebSocket.js';
+import { useOnlineUsers } from '@/composables/useOnlineUsers.js';
 import {chatApi, roomsApi} from "@/api/admin/rooms.js";
 
 const route = useRoute();

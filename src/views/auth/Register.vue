@@ -1,5 +1,5 @@
 <template>
-  <div class="login-wrapper">
+  <div class="register-wrapper">
     <!-- 左侧品牌展示区 -->
     <div class="brand-section">
       <!-- 装饰性背景元素 -->
@@ -24,44 +24,59 @@
           </div>
         </div>
 
-        <!-- 特色功能展示 -->
+        <!-- 注册优势展示 -->
         <div class="features">
           <div class="feature-card">
             <div class="feature-icon">
               <div class="icon-inner"></div>
             </div>
-            <h3>海量商品</h3>
-            <p>超过100万件精选商品，满足您的所有需求</p>
+            <h3>专享会员权益</h3>
+            <p>注册即享新人礼包，积分兑换，会员折扣等多重福利</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">
               <div class="icon-inner"></div>
             </div>
-            <h3>安全支付</h3>
-            <p>多重加密保护，确保每一笔交易安全可靠</p>
+            <h3>快速下单体验</h3>
+            <p>一键下单，智能推荐，让购物更简单高效</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <div class="icon-inner"></div>
+            </div>
+            <h3>订单实时追踪</h3>
+            <p>随时查看订单状态，物流信息一目了然</p>
           </div>
         </div>
       </div>
 
-      <!-- 底部统计信息 -->
-      <div class="stats">
-        <div class="stat-item">
-          <div class="stat-value">2M+</div>
-          <div class="stat-label">活跃用户</div>
+      <!-- 底部信任标识 -->
+      <div class="trust-badges">
+        <div class="badge-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>信息加密</span>
         </div>
-        <div class="stat-item">
-          <div class="stat-value">50K+</div>
-          <div class="stat-label">商家入驻</div>
+        <div class="badge-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>安全认证</span>
         </div>
-        <div class="stat-item">
-          <div class="stat-value">99.9%</div>
-          <div class="stat-label">好评率</div>
+        <div class="badge-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>7x24客服</span>
         </div>
       </div>
     </div>
 
-    <!-- 右侧登录表单区 -->
+    <!-- 右侧注册表单区 -->
     <div class="form-section">
       <div class="form-container">
         <!-- 移动端 Logo -->
@@ -76,20 +91,40 @@
           <span>ShopHub</span>
         </div>
 
-        <!-- 登录卡片 -->
-        <div class="login-card-new">
+        <!-- 注册卡片 -->
+        <div class="register-card-new">
           <div class="card-header">
-            <h2>欢迎回来</h2>
-            <p>登录您的账户继续购物之旅</p>
+            <h2>创建账户</h2>
+            <p>加入我们，开启精彩购物之旅</p>
           </div>
 
-          <!-- 错误提示 -->
+          <!-- 错误/成功提示 -->
           <div v-if="error" class="error-alert">
             {{ error }}
           </div>
+          <div v-if="success" class="success-alert">
+            {{ success }}
+          </div>
 
-          <!-- 登录表单 -->
-          <div class="login-form-new">
+          <!-- 注册表单 -->
+          <div class="register-form-new">
+            <!-- 用户名输入 -->
+            <div class="form-field">
+              <label>用户名</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input
+                    v-model="username"
+                    type="text"
+                    placeholder="请输入用户名"
+                    required
+                />
+              </div>
+            </div>
+
             <!-- 邮箱输入 -->
             <div class="form-field">
               <label>邮箱地址</label>
@@ -118,8 +153,9 @@
                 <input
                     v-model="password"
                     :type="showPassword ? 'text' : 'password'"
-                    placeholder="••••••••"
+                    placeholder="至少8位字符"
                     required
+                    minlength="8"
                 />
                 <button
                     type="button"
@@ -136,25 +172,63 @@
                   </svg>
                 </button>
               </div>
+              <!-- 密码强度指示器 -->
+              <div class="password-strength" v-if="password">
+                <div class="strength-bar">
+                  <div
+                      class="strength-fill"
+                      :class="passwordStrength.class"
+                      :style="{ width: passwordStrength.width }"
+                  ></div>
+                </div>
+                <span class="strength-text" :class="passwordStrength.class">
+                  {{ passwordStrength.text }}
+                </span>
+              </div>
             </div>
 
-            <!-- 记住我和忘记密码 -->
-            <div class="form-options">
-              <label class="remember-me">
+            <!-- 确认密码输入 -->
+            <div class="form-field">
+              <label>确认密码</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
                 <input
-                    type="checkbox"
-                    v-model="rememberMe"
+                    v-model="confirmPassword"
+                    type="password"
+                    placeholder="再次输入密码"
+                    required
                 />
-                <span>记住我</span>
-              </label>
-              <a href="#" class="forgot-password">忘记密码？</a>
+                <div class="match-indicator" v-if="confirmPassword">
+                  <svg v-if="password === confirmPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="match-icon">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mismatch-icon">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </div>
+              </div>
             </div>
 
-            <!-- 登录按钮 -->
+            <!-- 服务条款 -->
+            <div class="terms-checkbox">
+              <label>
+                <input type="checkbox" v-model="agreeTerms" required />
+                <span>我已阅读并同意
+                  <a href="#">服务条款</a> 和
+                  <a href="#">隐私政策</a>
+                </span>
+              </label>
+            </div>
+
+            <!-- 注册按钮 -->
             <button
-                @click="handleLocalLogin"
-                :disabled="loading"
-                class="btn-login"
+                @click="handleRegister"
+                :disabled="loading || !agreeTerms"
+                class="btn-register"
             >
               <span v-if="loading" class="loading-spinner">
                 <svg class="spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -167,70 +241,49 @@
                   <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
                   <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
                 </svg>
-                登录中...
+                注册中...
               </span>
-              <span v-else>登录</span>
+              <span v-else>创建账户</span>
             </button>
           </div>
 
           <!-- 分隔线 -->
           <div class="divider-new">
-            <span>或使用第三方登录</span>
+            <span>或使用第三方注册</span>
           </div>
 
-          <!-- 第三方登录 -->
+          <!-- 第三方注册 -->
           <div class="oauth-grid">
             <button
                 v-for="provider in authStore.availableProviders"
                 :key="provider"
-                @click="handleAdminOAuthLogin(provider)"
+                @click="handleOAuthSignup(provider)"
                 class="oauth-btn"
             >
-              <!-- Google 图标 -->
-              <svg v-if="provider === 'google'" width="20" height="20" viewBox="0 0 24 24">
-                <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"/>
-                <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"/>
-                <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"/>
-                <path
-                    d="M12 6.75c1.63 0 3.06.56 4.21 1.65l3.15-3.15C16.94 2.26 14.54 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"/>
+              <svg v-if="provider === 'google'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.788 5.108A9 9 0 1 0 21 12h-8"></path>
               </svg>
-              <!-- GitHub 图标 -->
-              <svg v-else-if="provider === 'github'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.797 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              <svg v-else-if="provider === 'github'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
               </svg>
-              <!-- 微信图标（绿色官方色） -->
-              <svg v-else-if="provider === 'wechat'" width="20" height="20" viewBox="0 0 24 24" fill="#07C160">
-                <path
-                    d="M9.5 4.5C6.462 4.5 4 6.96 4 9.99c0 1.97 1.113 3.698 2.837 4.586.374.193.506.68.306 1.04l-.56 1.058c-.19.36.14.786.518.786.155 0 .318-.07.418-.197l1.284-1.208c.236-.222.553-.32.87-.27 1.28.2 2.645-.077 3.827-1.005 1.054-2.04.666-4.462-.948-6.03C11.724 6.888 10.7 4.5 9.5 4.5z"/>
-                <path
-                    d="M19.5 14.5c-3.038 0-5.5 2.46-5.5 5.5 0 1.63.715 3.182 1.96 4.242.374.32.47.88.237 1.302l-.56 1.058c-.19.36.14.786.518.786.155 0 .318-.07.418-.197l1.284-1.208c.236-.222.553-.32.87-.27 1.28.2 2.645-.077 3.827-1.005 1.054-2.04.666-4.462-.948-6.03-.832-1.862-1.856-4.25-3.106-4.25z"/>
+              <svg v-else-if="provider === 'wechat'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.5 7.5c-3.333-3.333-8.667-3.333-12 0-2.667 2.667-3.333 6.333-2 9.5.667 1.333 1.667 2.333 3 2.833.333.667.333 1.167-.167 1.167-.667 0-1.333-.333-2-.667l-1.333.667c1.333 1 3 1.667 4.5 1.667 3.333 3.333 8.667 3.333 12 0 2.667-2.667 3.333-6.333 2-9.5-.667-1.333-1.667-2.333-3-2.833-.333-.667-.333-1.167.167-1.167.667 0 1.333.333 2 .667l1.333-.667c-1.333-1-3-1.667-4.5-1.667z"/>
+                <path d="M8.833 12.167a1.167 1.167 0 1 0 0-2.334 1.167 1.167 0 0 0 0 2.334z"/>
+                <path d="M15.167 12.167a1.167 1.167 0 1 0 0-2.334 1.167 1.167 0 0 0 0 2.334z"/>
               </svg>
-              <!-- 显示文字 -->
-              <span class="provider-text">{{ provider === 'google' ? 'Google' : provider === 'github' ? 'GitHub' : '微信' }}</span>
             </button>
           </div>
-          <p class="signup-text">
-            还没有账户？
-            <router-link to="/register">立即注册</router-link>
+
+          <!-- 登录链接 -->
+          <p class="login-text">
+            已有账户？
+            <router-link to="/login">立即登录</router-link>
           </p>
         </div>
-        <div class="footer-links">
-          <p>登录即表示您同意我们的</p>
-          <div class="links">
-            <a href="#">服务条款</a>
-            <span>·</span>
-            <a href="#">隐私政策</a>
-            <span>·</span>
-            <a href="#">Cookie政策</a>
-          </div>
+
+        <!-- 底部信息 -->
+        <div class="footer-info">
+          <p>注册即表示您已满18岁并同意我们的政策</p>
         </div>
       </div>
     </div>
@@ -238,28 +291,74 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth.js';
 
 const authStore = useAuthStore();
 const router = useRouter();
 
+const username = ref('');
 const email = ref('');
 const password = ref('');
+const confirmPassword = ref('');
 const loading = ref(false);
 const error = ref('');
+const success = ref('');
 const showPassword = ref(false);
-const rememberMe = ref(false);
+const agreeTerms = ref(false);
 
-const handleLocalLogin = async () => {
+// 密码强度计算
+const passwordStrength = computed(() => {
+  const pwd = password.value;
+  if (pwd.length === 0) return { width: '0%', class: '', text: '' };
+
+  let strength = 0;
+  if (pwd.length >= 8) strength++;
+  if (pwd.length >= 12) strength++;
+  if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength++;
+  if (/\d/.test(pwd)) strength++;
+  if (/[^a-zA-Z0-9]/.test(pwd)) strength++;
+
+  if (strength <= 2) {
+    return { width: '33%', class: 'weak', text: '弱' };
+  } else if (strength <= 3) {
+    return { width: '66%', class: 'medium', text: '中' };
+  } else {
+    return { width: '100%', class: 'strong', text: '强' };
+  }
+});
+
+const handleRegister = async () => {
   loading.value = true;
   error.value = '';
+  success.value = '';
 
-  const result = await authStore.login(email.value, password.value);
+  // 验证密码匹配
+  if (password.value !== confirmPassword.value) {
+    error.value = '两次输入的密码不一致';
+    loading.value = false;
+    return;
+  }
+
+  // 验证密码长度
+  if (password.value.length < 8) {
+    error.value = '密码至少需要8位字符';
+    loading.value = false;
+    return;
+  }
+
+  const result = await authStore.register(
+      email.value,
+      username.value,
+      password.value
+  );
 
   if (result.success) {
-    router.push('/dashboard/home');
+    success.value = '注册成功！正在跳转...';
+    setTimeout(() => {
+      router.push('/dashboard/home');
+    }, 1500);
   } else {
     error.value = result.error;
   }
@@ -267,14 +366,15 @@ const handleLocalLogin = async () => {
   loading.value = false;
 };
 
-const handleAdminOAuthLogin = async (provider) => {
+const handleOAuthSignup = async (provider) => {
   loading.value = true;
   error.value = '';
+
   try {
-    await authStore.loginWithOAuth(provider,true);
+    await authStore.loginWithOAuth(provider);
     router.push('/dashboard/home');
   } catch (err) {
-    error.value = err.message || 'OAuth登录失败';
+    error.value = err.message || 'OAuth注册失败';
   }
 
   loading.value = false;
@@ -282,7 +382,7 @@ const handleAdminOAuthLogin = async (provider) => {
 </script>
 
 <style scoped>
-.login-wrapper {
+.register-wrapper {
   display: flex;
   min-height: 100vh;
 }
@@ -371,10 +471,10 @@ const handleAdminOAuthLogin = async (provider) => {
 }
 
 .features {
-  margin-top: 64px;
+  margin-top: 48px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
 }
 
 .feature-card {
@@ -405,7 +505,7 @@ const handleAdminOAuthLogin = async (provider) => {
 }
 
 .feature-card h3 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   margin: 0 0 8px 0;
 }
@@ -414,26 +514,24 @@ const handleAdminOAuthLogin = async (provider) => {
   color: rgba(255, 255, 255, 0.8);
   margin: 0;
   line-height: 1.5;
+  font-size: 14px;
 }
 
-.stats {
+.trust-badges {
   position: relative;
   z-index: 10;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  display: flex;
+  gap: 24px;
   color: white;
 }
 
-.stat-value {
-  font-size: 30px;
-  font-weight: 700;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  margin-top: 4px;
+.badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* 右侧表单区 */
@@ -444,11 +542,12 @@ const handleAdminOAuthLogin = async (provider) => {
   justify-content: center;
   padding: 32px;
   background: #f9fafb;
+  overflow-y: auto;
 }
 
 .form-container {
   width: 100%;
-  max-width: 448px;
+  max-width: 480px;
 }
 
 .mobile-logo {
@@ -482,7 +581,7 @@ const handleAdminOAuthLogin = async (provider) => {
   color: #111827;
 }
 
-.login-card-new {
+.register-card-new {
   background: white;
   border-radius: 16px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -490,7 +589,7 @@ const handleAdminOAuthLogin = async (provider) => {
 }
 
 .card-header {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .card-header h2 {
@@ -506,8 +605,8 @@ const handleAdminOAuthLogin = async (provider) => {
 }
 
 .error-alert {
-  margin-bottom: 24px;
-  padding: 16px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
   background: #fef2f2;
   border: 1px solid #fecaca;
   border-radius: 8px;
@@ -515,10 +614,20 @@ const handleAdminOAuthLogin = async (provider) => {
   font-size: 14px;
 }
 
-.login-form-new {
+.success-alert {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  color: #16a34a;
+  font-size: 14px;
+}
+
+.register-form-new {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .form-field label {
@@ -574,45 +683,78 @@ const handleAdminOAuthLogin = async (provider) => {
   color: #4b5563;
 }
 
-.form-options {
+.match-indicator {
+  position: absolute;
+  right: 16px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
-.remember-me {
+.match-icon {
+  color: #16a34a;
+}
+
+.mismatch-icon {
+  color: #dc2626;
+}
+
+.password-strength {
+  margin-top: 8px;
+}
+
+.strength-bar {
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: width 0.3s, background-color 0.3s;
+}
+
+
+.strength-text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.terms-checkbox {
+  margin-top: 4px;
+}
+
+.terms-checkbox label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   cursor: pointer;
+  font-size: 13px;
+  color: #6b7280;
 }
 
-.remember-me input {
+.terms-checkbox input {
   width: 16px;
   height: 16px;
+  min-width: 16px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   cursor: pointer;
   margin-right: 8px;
+  margin-top: 2px;
 }
 
-.remember-me span {
-  font-size: 14px;
-  color: #374151;
-}
-
-.forgot-password {
-  font-size: 14px;
-  font-weight: 500;
+.terms-checkbox a {
   color: #667eea;
   text-decoration: none;
-  transition: color 0.3s;
+  font-weight: 500;
 }
 
-.forgot-password:hover {
-  color: #5568d3;
+.terms-checkbox a:hover {
+  text-decoration: underline;
 }
 
-.btn-login {
+.btn-register {
   width: 100%;
   padding: 12px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -624,14 +766,15 @@ const handleAdminOAuthLogin = async (provider) => {
   cursor: pointer;
   transition: all 0.3s;
   box-shadow: 0 10px 15px -3px rgba(102, 126, 234, 0.3);
+  margin-top: 8px;
 }
 
-.btn-login:hover {
+.btn-register:hover {
   box-shadow: 0 20px 25px -5px rgba(102, 126, 234, 0.4);
   transform: translateY(-2px);
 }
 
-.btn-login:disabled {
+.btn-register:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -661,7 +804,7 @@ const handleAdminOAuthLogin = async (provider) => {
   position: relative;
   display: flex;
   align-items: center;
-  margin: 24px 0;
+  margin: 24px 0 20px;
   color: #9ca3af;
   font-size: 14px;
 }
@@ -688,8 +831,8 @@ const handleAdminOAuthLogin = async (provider) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 16px;
   border: 1px solid #d1d5db;
+  padding: 12px 16px;
   border-radius: 8px;
   background: white;
   cursor: pointer;
@@ -703,49 +846,32 @@ const handleAdminOAuthLogin = async (provider) => {
   color: #111827;
 }
 
-.signup-text {
+.login-text {
   text-align: center;
-  margin-top: 32px;
+  margin-top: 24px;
   color: #6b7280;
   font-size: 14px;
 }
 
-.signup-text a {
+.login-text a {
   color: #667eea;
   text-decoration: none;
   font-weight: 600;
   margin-left: 4px;
 }
 
-.signup-text a:hover {
+.login-text a:hover {
   color: #5568d3;
 }
 
-.footer-links {
-  margin-top: 32px;
+.footer-info {
+  margin-top: 24px;
   text-align: center;
   font-size: 12px;
   color: #9ca3af;
 }
 
-.footer-links p {
-  margin: 0 0 4px 0;
-}
-
-.links {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.links a {
-  color: #9ca3af;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.links a:hover {
-  color: #374151;
+.footer-info p {
+  margin: 0;
 }
 </style>

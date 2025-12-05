@@ -13,19 +13,13 @@ export function useWebSocket(roomId, token, wsType) {
             console.log('WebSocket 已连接，跳过重复连接');
             return;
         }
-
         // 重置标志位
         isManualDisconnect = false;
-
         const endpoints = {
             chat: `ws://localhost:8080/api/v1/chat/${roomId}/ws`,
         };
         const wsUrl = `${endpoints[wsType]}?token=${token}`;
-
-        console.log('正在连接 WebSocket:', wsUrl);
-
         ws.value = new WebSocket(wsUrl);
-
         ws.value.onopen = () => {
             console.log('WebSocket 连接成功');
             isConnected.value = true;

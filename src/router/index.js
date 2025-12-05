@@ -1,14 +1,14 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import {useAuthStore} from '@/stores/auth';
-import Login from '@/views/Login.vue';
-import Register from '@/views/Register.vue';
-import OAuthCallback from '@/views/OAuthCallback.vue';
-import Dashboard from '@/views/Dashboard.vue';
-import RoomList from "@/views/RoomList.vue";
-import CreateRoom from "@/views/CreateRoom.vue";
-import FeaturesPage from "@/views/FeaturesPage.vue";
-import HomePage from "@/views/HomePage.vue";
-import ChatRoom from "@/views/ChatRoom.vue";
+import Login from '@/views/auth/Login.vue';
+import Register from '@/views/auth/Register.vue';
+import OAuthCallback from '@/views/auth/OAuthCallback.vue';
+import Dashboard from '@/views/admin/Dashboard.vue';
+import RoomList from "@/views/admin/RoomList.vue";
+import CreateRoom from "@/views/admin/CreateRoom.vue";
+import FeaturesPage from "@/views/admin/FeaturesPage.vue";
+import HomePage from "@/views/admin/HomePage.vue";
+import ChatRoom from "@/views/admin/ChatRoom.vue";
 import ProductsPage from "@/views/business/ProductsPage.vue";
 
 const routes = [

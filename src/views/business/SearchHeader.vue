@@ -7,7 +7,7 @@
           <span class="welcome">欢迎来到怪叽叽!</span>
           <div class="top-actions">
             <a href="#" class="link" @click.prevent="goToSellerLogin">卖家中心</a>
-            <a href="#" class="link">客户服务</a>
+            <a href="#" class="link" @click.prevent="$emit('chat-click')">客户服务</a>
             <a href="#" class="link" @click.prevent="$emit('profile-click')">我的订单</a>
           </div>
         </div>
@@ -75,7 +75,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['search', 'cart-click', 'profile-click']);
+const emit = defineEmits(['search', 'cart-click', 'profile-click','chat-click']);
 
 const searchQuery = ref('');
 
