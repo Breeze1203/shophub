@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-export function useWebSocket(roomId, token, wsType) {
+export function useWebSocket(initialRoomId, token, wsType) {
     const ws = ref(null);
     const isConnected = ref(false);
     const eventHandlers = new Map();
@@ -8,20 +8,26 @@ export function useWebSocket(roomId, token, wsType) {
     // 添加标志位，表示是否主动断开连接
     let isManualDisconnect = false;
 
-    const connect = () => {
+    const connect = (dynamicRoomId = null) => {
         if (ws.value && ws.value.readyState === WebSocket.OPEN) {
             console.log('WebSocket 已连接，跳过重复连接');
+            return;
+        }
+        const activeRoomId = dynamicRoomId || initialRoomId;
+        // 如果没有 ID，阻止连接并报错
+        if (!activeRoomId) {
+            console.error('WebSocket 连接失败: Room ID 为空');
             return;
         }
         // 重置标志位
         isManualDisconnect = false;
         const endpoints = {
-            chat: `ws://localhost:8080/api/v1/chat/${roomId}/ws`,
+            chat: `ws://localhost:8080/api/v1/chat/${activeRoomId}/ws`,
         };
         const wsUrl = `${endpoints[wsType]}?token=${token}`;
         ws.value = new WebSocket(wsUrl);
         ws.value.onopen = () => {
-            console.log('WebSocket 连接成功');
+            console.log('WebSocket 连接成功',wsUrl);
             isConnected.value = true;
         };
 

@@ -146,10 +146,10 @@ export const useAuthStore = defineStore('auth', () => {
             const data = await authAPI.getOAuthURL(provider, state);
 
             if (isQRCodeProvider(provider)) {
-                // 方案一：二维码模式（窗口较大，适应扫码页）
+                // 二维码模式（窗口较大，适应扫码页）
                 return await handleQRCodeLogin(data.auth_url);
             } else {
-                // 方案二：传统弹窗模式（窗口较窄，适应表单）
+                // 传统弹窗模式（窗口较窄，适应表单）
                 return await handlePopupLogin(data.auth_url);
             }
         } catch (error) {
@@ -207,6 +207,7 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = null;
         refreshToken.value = null;
         user.value = null;
+        isAdmin.value=false;
         router.push('/login');
     };
 

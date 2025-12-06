@@ -38,24 +38,42 @@ const routes = [
     {
         path: '/dashboard',
         component: Dashboard,
-        meta: {requiresAuth: true},
+        meta: {requiresAuth: true, requiresAdmin: true},
         children: [
-            {path: 'home', component: HomePage, name: 'HomePage', meta: {requiresAuth: true}},
-            {path: 'create', component: CreateRoom, name: 'CreateRoom', meta: {requiresAuth: true}},
-            {path: 'rooms', component: RoomList, name: 'RoomList', meta: {requiresAuth: true}},
-            {path: 'features', component: FeaturesPage, name: 'FeaturesPage', meta: {requiresAuth: true}},
-            {path: 'customer', component: CustomerService, name: 'CustomerService', meta: {requiresAuth: true}},
+            {path: 'home', component: HomePage, name: 'HomePage', meta: {requiresAuth: true, requiresAdmin: true}},
+            {
+                path: 'create',
+                component: CreateRoom,
+                name: 'CreateRoom',
+                meta: {requiresAuth: true, requiresAdmin: true}
+            },
+            {path: 'rooms', component: RoomList, name: 'RoomList', meta: {requiresAuth: true, requiresAdmin: true}},
+            {
+                path: 'features',
+                component: FeaturesPage,
+                name: 'FeaturesPage',
+                meta: {requiresAuth: true, requiresAdmin: true}
+            },
+            {
+                path: 'customer',
+                component: CustomerService,
+                name: 'CustomerService',
+                meta: {requiresAuth: true, requiresAdmin: true}
+            },
         ]
     },
     {
         path: '/',
-        redirect: '/dashboard',
+        redirect: '/products',
     },
     {
         path: '/chat/:id',
         name: 'ChatRoom',
         component: ChatRoom,
-        meta: {requiresAuth: true}
+        meta: {
+            requiresAuth: true,
+            requiresAdmin: true
+        }
     },
 ];
 
@@ -67,30 +85,27 @@ const router = createRouter({
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore()
-
-    // 等待 authStore 初始化完成
+    //  等待 authStore 初始化完成
     if (!authStore.isInitialized) {
         await authStore.init()
     }
+    // 管理员页面的保护
+    if (to.meta.requiresAdmin && !authStore.isAdmin) {
+        // 拒绝访问，踢回首页或显示 403 页面
+        return next({path: '/'})
+    }
 
-    // 需要登录的页面，但没登录 → 去登录（并带上想去哪）
+    // 需要登录的页面，但没登录
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
         return next({
             path: '/login',
-            query: { redirect: to.fullPath }  // 登录后能回来
+            query: {redirect: to.fullPath}
         })
     }
-
-    //  管理员已登录，还想访问登录页 → 直接跳后台（用 replace 防止死循环）
+    // 管理员已登录，访问登录页 -> dashboard
     if (authStore.isAuthenticated && authStore.isAdmin && to.path === '/login') {
-        return next({ path: '/dashboard', replace: true })
+        return next({path: '/dashboard', replace: true})
     }
-
-    // 普通已登录用户访问登录页 → 跳首页
-    if (authStore.isAuthenticated && to.path === '/login') {
-        return next({ path: '/', replace: true })
-    }
-    // 其他情况全部放行
     next()
 })
 

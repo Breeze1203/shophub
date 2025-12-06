@@ -40,11 +40,6 @@
             <p>👋 您好,我是客服助手</p>
             <p>有什么可以帮您的吗?</p>
           </div>
-
-          <!-- 连接状态提示 -->
-          <div v-if="!isConnected && sessionId" class="connection-status">
-            <p>正在连接...</p>
-          </div>
         </div>
 
         <div class="chat-input">
@@ -64,15 +59,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useWebSocket } from '@/composables/useWebSocket';
-import { customerApi } from "@/api/admin/customer.js";
+import {customerApi} from "@/api/admin/customer.js";
 
 const props = defineProps({
-  userId: {
-    type: Number,
-    required: true
-  },
   token: {
     type: String,
     required: true
@@ -87,85 +78,43 @@ const inputMessage = ref('');
 const unreadCount = ref(0);
 const messagesContainer = ref(null);
 const sessionId = ref(null);
-const isCreatingSession = ref(false); // 防止重复创建会话
-
-const roomId = computed(() => `${props.userId}`);
+const roomId = ref(null);
 
 // WebSocket 连接
 const { connect, disconnect, send, on, isConnected } = useWebSocket(
-    roomId.value,
+    null,
     props.token,
     'chat'
 );
 
+
 // 创建或获取会话
 const createSession = async () => {
-  // 防止重复创建
-  if (isCreatingSession.value || sessionId.value) {
-    return;
-  }
-
-  isCreatingSession.value = true;
-
   try {
     const response = await customerApi.createSession();
     sessionId.value = response.data.session.id;
-
+    roomId.value=response.data.session.room_id;
     // 连接 WebSocket
-    await connect();
+    connect(roomId.value);
   } catch (error) {
     console.error('创建会话失败:', error);
-    // 创建失败后重置状态
-    sessionId.value = null;
-    // 可以在这里添加错误提示
-    messages.value.push({
-      id: Date.now(),
-      type: 'system',
-      content: '连接失败,请稍后重试'
-    });
-  } finally {
-    isCreatingSession.value = false;
   }
 };
 
-// 打开聊天窗口
-const openChat = async () => {
+// 修改 openChat 方法
+const openChat = () => {
   isVisible.value = true;
   isMinimized.value = false;
   unreadCount.value = 0;
 
-  // 如果没有会话或者未连接,则创建新会话
-  if (!sessionId.value && !isCreatingSession.value) {
-    await createSession();
-  } else if (sessionId.value && !isConnected.value) {
-    // 如果有会话但未连接,尝试重新连接
-    try {
-      await connect();
-    } catch (error) {
-      console.error('重新连接失败:', error);
-      // 连接失败,清除旧会话,创建新会话
-      sessionId.value = null;
-      await createSession();
-    }
+  if (!sessionId.value) {
+    createSession();
   }
 };
-
 // 关闭客服聊天
 const closeChat = () => {
   isVisible.value = false;
-
-  // 安全断开连接
-  try {
-    disconnect();
-  } catch (error) {
-    console.error('断开连接时出错:', error);
-  }
-
-  // 清理状态
-  sessionId.value = null;
-  messages.value = [];
-  inputMessage.value = '';
-  unreadCount.value = 0;
+  disconnect();
 };
 
 // 最小化切换
@@ -181,20 +130,11 @@ const toggleMinimize = () => {
 const sendMessage = () => {
   if (!inputMessage.value.trim() || !isConnected.value) return;
 
-  try {
-    send('message', {
-      content: inputMessage.value.trim()
-    });
-    inputMessage.value = '';
-  } catch (error) {
-    console.error('发送消息失败:', error);
-    // 可以添加错误提示
-    messages.value.push({
-      id: Date.now(),
-      type: 'system',
-      content: '消息发送失败,请重试'
-    });
-  }
+  send('message', {
+    content: inputMessage.value.trim()
+  });
+
+  inputMessage.value = '';
 };
 
 // 滚动到底部
@@ -247,30 +187,10 @@ onMounted(() => {
   on('user_left', (data) => {
     console.log('客服离开:', data);
   });
-
-  // 监听连接错误
-  on('error', (error) => {
-    console.error('WebSocket错误:', error);
-    messages.value.push({
-      id: Date.now(),
-      type: 'system',
-      content: '连接出现问题,请稍后重试'
-    });
-  });
-
-  // 监听断开连接
-  on('disconnect', () => {
-    console.log('WebSocket已断开');
-  });
 });
 
 onUnmounted(() => {
-  // 组件卸载时清理
-  try {
-    disconnect();
-  } catch (error) {
-    console.error('卸载时断开连接出错:', error);
-  }
+  disconnect();
 });
 
 // 暴露方法给父组件
@@ -440,13 +360,6 @@ defineExpose({
   padding: 40px 20px;
   color: #666;
   line-height: 1.8;
-}
-
-.connection-status {
-  text-align: center;
-  padding: 20px;
-  color: #999;
-  font-size: 13px;
 }
 
 /* 输入区域 */

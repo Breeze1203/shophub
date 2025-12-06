@@ -130,7 +130,6 @@
     <CustomerServiceChat
         v-if="authStore.isAuthenticated"
         ref="customerServiceRef"
-        :user-id="authStore.user.id"
         :token="authStore.accessToken"
     />
   </div>
@@ -359,6 +358,7 @@ const handleOAuthLogin = async (provider) => {
   try {
     await authStore.loginWithOAuth(provider,false);
     hideLoginModal();
+    await customerServiceRef.value?.openChat();
   } catch (err) {
     console.log('登录失败')
   }
