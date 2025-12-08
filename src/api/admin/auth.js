@@ -9,11 +9,12 @@ export const authAPI = {
     },
 
     // Local authentication
-    async register(email, username, password) {
+    async register(email, username, password,type) {
         const response = await api.post('/auth/register', {
             email,
             username,
             password,
+            type
         });
         return response.data;
     },
@@ -34,9 +35,9 @@ export const authAPI = {
     },
 
     // OAuth authentication
-    async getOAuthURL(provider, state) {
+    async getOAuthURL(provider, state,type) {
         const response = await api.get(`/auth/oauth/${provider}`, {
-            params: { state },
+            params: { state,type},
         });
         return response.data;
     },

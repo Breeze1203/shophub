@@ -99,34 +99,37 @@ import {ref, computed, onMounted} from 'vue';
 import {useWebSocket} from '@/composables/useWebSocket';
 import {customerApi} from "@/api/admin/customer.js";
 import {chatApi} from "@/api/admin/rooms.js";
-
 const activeTab = ref('pending');
 const sessions = ref([]);
 const currentSession = ref(null);
 const messages = ref([]);
 const inputMessage = ref('');
-const token = localStorage.getItem('adminToken');
+const token = localStorage.getItem('access_token');
 
 let wsConnection = null;
 
 // 筛选会话
 const filteredSessions = computed(() => {
-  return sessions.value.filter(s => s.status === activeTab.value);
+  return (sessions.value || []).filter(s => s.status === activeTab.value);
 });
 
 const pendingCount = computed(() => {
-  return sessions.value.filter(s => s.status === 'pending').length;
+  return (sessions.value || []).filter(s => s.status === 'pending').length;
 });
 
 const activeCount = computed(() => {
-  return sessions.value.filter(s => s.status === 'active').length;
+  return (sessions.value || []).filter(s => s.status === 'active').length;
+});
+
+const isConnected = computed(() => {
+  return wsConnection?.isConnected.value;
 });
 
 // 获取会话列表
 const fetchSessions = async () => {
   try {
     const response = await customerApi.getSessions();
-    sessions.value = response.sessions;
+    sessions.value = response.data.sessions;
   } catch (error) {
     console.error('获取会话列表失败:', error);
   }
@@ -186,7 +189,7 @@ const closeSession = async () => {
   try {
     await customerApi.closeSession(currentSession.value.id);
     currentSession.value.status = 'closed';
-    fetchSessions();
+     fetchSessions();
   } catch (error) {
     console.error('关闭会话失败:', error);
   }

@@ -89,8 +89,8 @@ router.beforeEach(async (to, from, next) => {
     if (!authStore.isInitialized) {
         await authStore.init()
     }
-    // 管理员页面的保护
-    if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    // 客户的话
+    if (to.meta.requiresAdmin && authStore.user.type==='client') {
         // 拒绝访问，踢回首页或显示 403 页面
         return next({path: '/'})
     }
@@ -103,7 +103,7 @@ router.beforeEach(async (to, from, next) => {
         })
     }
     // 管理员已登录，访问登录页 -> dashboard
-    if (authStore.isAuthenticated && authStore.isAdmin && to.path === '/login') {
+    if (authStore.isAuthenticated && authStore.user.type!=='client' && to.path === '/login') {
         return next({path: '/dashboard', replace: true})
     }
     next()

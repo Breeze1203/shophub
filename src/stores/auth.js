@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref(null);
-    const isAdmin = ref(false);
     const accessToken = ref(localStorage.getItem('access_token'));
     const refreshToken = ref(localStorage.getItem('refresh_token'));
     const isAuthenticated = computed(() => !!accessToken.value);
@@ -137,13 +136,11 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     // OAuth login - 主入口
-    const loginWithOAuth = async (provider, isAdminUser = false) => {
+    const loginWithOAuth = async (provider, type='client') => {
         try {
-            isAdmin.value = isAdminUser;
             const state = Math.random().toString(36).substring(7);
             sessionStorage.setItem('oauth_state', state);
-
-            const data = await authAPI.getOAuthURL(provider, state);
+            const data = await authAPI.getOAuthURL(provider, state,type);
 
             if (isQRCodeProvider(provider)) {
                 // 二维码模式（窗口较大，适应扫码页）
@@ -161,9 +158,9 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     // Local registration
-    const register = async (email, username, password) => {
+    const register = async (email, username, password,type='client') => {
         try {
-            const data = await authAPI.register(email, username, password);
+            const data = await authAPI.register(email, username, password,type);
             setAuth(data);
             return { success: true };
         } catch (error) {
@@ -207,7 +204,6 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = null;
         refreshToken.value = null;
         user.value = null;
-        isAdmin.value=false;
         router.push('/login');
     };
 
@@ -221,7 +217,6 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     return {
-        isAdmin,
         user,
         isAuthenticated,
         availableProviders,

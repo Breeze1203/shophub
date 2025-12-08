@@ -344,8 +344,6 @@ const handleReset = () => {
 const showLoginModal = () => {
   if (!authStore.isAuthenticated) {
     isLoginModalVisible.value = true;
-  } else {
-    document.body.style.overflow = 'hidden';
   }
 };
 
@@ -356,7 +354,7 @@ const hideLoginModal = () => {
 //  登录认证
 const handleOAuthLogin = async (provider) => {
   try {
-    await authStore.loginWithOAuth(provider,false);
+    await authStore.loginWithOAuth(provider,'client');
     hideLoginModal();
     await customerServiceRef.value?.openChat();
   } catch (err) {

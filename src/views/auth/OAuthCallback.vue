@@ -57,7 +57,6 @@ onMounted(async () => {
     // 从 URL 获取 code 和 state
     const code = route.query.code;
     const state = route.query.state;
-
     if (!code || !state) {
       throw new Error('缺少认证参数');
     }

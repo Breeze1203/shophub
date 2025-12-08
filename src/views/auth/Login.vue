@@ -260,9 +260,10 @@
 </template>
 
 <script setup>
-import {ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import {useRouter} from 'vue-router';
 import {useAuthStore} from '@/stores/auth.js';
+import CookieUtil from "@/utils/CookieUtil.js";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -277,9 +278,7 @@ const rememberMe = ref(false);
 const handleLocalLogin = async () => {
   loading.value = true;
   error.value = '';
-
-  const result = await authStore.login(email.value, password.value);
-
+  const result = await authStore.login(email.value, password.value, rememberMe.value);
   if (result.success) {
     router.push('/dashboard/home');
   } else {
@@ -293,7 +292,7 @@ const handleAdminOAuthLogin = async (provider) => {
   loading.value = true;
   error.value = '';
   try {
-    await authStore.loginWithOAuth(provider, true);
+    await authStore.loginWithOAuth(provider, 'merchant');
     router.push('/dashboard/home');
   } catch (err) {
     error.value = err.message || 'OAuth登录失败';
@@ -301,6 +300,11 @@ const handleAdminOAuthLogin = async (provider) => {
 
   loading.value = false;
 };
+
+onMounted(() => {
+  email.value=CookieUtil.getCookie("remembered_password")
+  password.value=CookieUtil.getCookie("remembered_email");
+})
 </script>
 
 <style scoped>

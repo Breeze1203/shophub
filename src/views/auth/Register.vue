@@ -351,7 +351,8 @@ const handleRegister = async () => {
   const result = await authStore.register(
       email.value,
       username.value,
-      password.value
+      password.value,
+      'merchant'
   );
 
   if (result.success) {
@@ -371,7 +372,7 @@ const handleOAuthSignup = async (provider) => {
   error.value = '';
 
   try {
-    await authStore.loginWithOAuth(provider);
+    await authStore.loginWithOAuth(provider,'merchant');
     router.push('/dashboard/home');
   } catch (err) {
     error.value = err.message || 'OAuth注册失败';
