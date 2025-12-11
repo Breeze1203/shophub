@@ -21,15 +21,15 @@
         </div>
 
         <div class="chat-messages" ref="messagesContainer">
-          <div v-for="msg in messages" :key="msg.id" :class="['message', msg.type]">
+          <div v-for="msg in messages" :key="msg.id">
             <div v-if="msg.type === 'system'" class="system-message">
               {{ msg.content }}
             </div>
-            <div v-else :class="['message', msg.user_id === 1 ? 'right' : 'left']">
+            <div v-else :class="['message-bubble', msg.user_id ===authStore.user.id  ? 'message-right' : 'message-left']">
               <div class="message-header">
-                <span class="username" :style="{ color: msg.user_color }">
-                  {{ msg.username }}
-                </span>
+        <span class="username" :style="{ color: msg.user_color }">
+          {{ msg.username }}
+        </span>
                 <span class="time">{{ formatTime(msg.created_at) }}</span>
               </div>
               <div class="message-content">{{ msg.content }}</div>
@@ -62,6 +62,9 @@
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useWebSocket } from '@/composables/useWebSocket';
 import {customerApi} from "@/api/admin/customer.js";
+import {chatApi} from "@/api/admin/rooms.js";
+import {useAuthStore} from "@/stores/auth.js";
+const authStore = useAuthStore();
 
 const props = defineProps({
   token: {
@@ -94,10 +97,36 @@ const createSession = async () => {
     const response = await customerApi.createSession();
     sessionId.value = response.data.session.id;
     roomId.value=response.data.session.room_id;
+    // 加载历史消息
+    await loadHistoryMessages();
     // 连接 WebSocket
     connect(roomId.value);
   } catch (error) {
     console.error('创建会话失败:', error);
+  }
+};
+
+const loadHistoryMessages = async () => {
+  try {
+    const response = await chatApi.getMessages(roomId.value);
+    if (response.data) {
+      messages.value = response.data.map(msg => ({
+        id: msg.id,
+        type: msg.type || 'text',
+        user_id: msg.user_id,
+        username: msg.username,
+        user_color: msg.user_color,
+        content: msg.content,
+        created_at: msg.created_at
+      }));
+
+      // 滚动到底部
+      nextTick(() => {
+        scrollToBottom();
+      });
+    }
+  } catch (error) {
+    console.error('加载历史消息失败:', error);
   }
 };
 
@@ -311,10 +340,8 @@ defineExpose({
   overflow-y: auto;
   padding: 16px;
   background: #f5f5f5;
-}
-
-.message {
-  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 .system-message {
@@ -322,14 +349,34 @@ defineExpose({
   color: #999;
   font-size: 12px;
   padding: 8px;
+  margin-bottom: 16px;
+}
+
+.message-bubble {
+  padding: 12px;
+  margin-bottom: 16px;
+  max-width: 70%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .message-left {
-  padding: 12px;
+  background-color: #fff;
+  border-radius: 12px 12px 12px 4px;
+  align-self: flex-start;
 }
 
 .message-right {
-  padding: 12px;
+  background-color: #007bff;
+  border-radius: 12px 12px 4px 12px;
+  align-self: flex-end;
+}
+
+.message-right .message-content {
+  color: #fff;
+}
+
+.message-right .time {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .message-header {
@@ -351,18 +398,9 @@ defineExpose({
 
 .message-content {
   font-size: 14px;
-  color: #333;
   line-height: 1.5;
   word-wrap: break-word;
 }
-
-.welcome-message {
-  text-align: center;
-  padding: 40px 20px;
-  color: #666;
-  line-height: 1.8;
-}
-
 /* 输入区域 */
 .chat-input {
   padding: 12px;
