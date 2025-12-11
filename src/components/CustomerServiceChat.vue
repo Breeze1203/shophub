@@ -25,7 +25,7 @@
             <div v-if="msg.type === 'system'" class="system-message">
               {{ msg.content }}
             </div>
-            <div v-else class="user-message">
+            <div v-else :class="['message', msg.user_id === 1 ? 'right' : 'left']">
               <div class="message-header">
                 <span class="username" :style="{ color: msg.user_color }">
                   {{ msg.username }}
@@ -324,11 +324,12 @@ defineExpose({
   padding: 8px;
 }
 
-.user-message {
-  background: white;
+.message-left {
   padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.message-right {
+  padding: 12px;
 }
 
 .message-header {
@@ -402,18 +403,6 @@ defineExpose({
 .chat-input button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* 动画 */
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(20px);
-  opacity: 0;
 }
 
 /* 滚动条样式 */
