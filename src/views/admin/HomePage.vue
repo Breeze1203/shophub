@@ -1,7 +1,7 @@
 <template>
   <div class="page home-page">
     <div class="hero">
-      <h1 class="hero-title">🚀 WorkTogether</h1>
+      <h1 class="hero-title">🚀 ShopHub</h1>
       <p class="hero-subtitle">让远程编程协作像在同一个屏幕前一样简单</p>
       <div class="hero-actions">
         <button class="btn btn-primary">开始使用</button>
@@ -45,7 +45,6 @@
   font-size: 48px;
   margin-bottom: 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

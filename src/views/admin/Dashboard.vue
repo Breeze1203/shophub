@@ -4,7 +4,7 @@
       <div class="header-left">
         <div class="logo">
           <span class="logo-icon">🚀</span>
-          <span class="logo-text">WorkTogether</span>
+          <span class="logo-text">ShopHub</span>
         </div>
       </div>
 
@@ -155,7 +155,6 @@ const handleLogout = () => {
   font-size: 20px;
   font-weight: 700;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

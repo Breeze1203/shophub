@@ -123,7 +123,7 @@ const handleClick = () => {
 .current-price {
   font-size: 18px;
   font-weight: bold;
-  color: #ff6700;
+  color: #667eea;
 }
 
 .original-price {

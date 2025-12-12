@@ -203,8 +203,12 @@ export const useAuthStore = defineStore('auth', () => {
         authAPI.logout();
         accessToken.value = null;
         refreshToken.value = null;
+        if(user.value.type==='client'){
+            router.push('/products')
+        }else{
+            router.push('/login');
+        }
         user.value = null;
-        router.push('/login');
     };
 
     // Initialize store

@@ -49,15 +49,10 @@ const handleSelect = (category) => {
 }
 
 .category-item:hover {
-  border-color: #ff6700;
-  color: #ff6700;
+  border-color: #667eea;
+  color: #667eea;
 }
 
-.category-item.active {
-  background: #fff7e6;
-  border-color: #ff6700;
-  color: #ff6700;
-}
 
 .category-icon {
   font-size: 28px;

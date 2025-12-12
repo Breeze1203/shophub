@@ -21,25 +21,24 @@
         </div>
 
         <div class="chat-messages" ref="messagesContainer">
-          <div v-for="msg in messages" :key="msg.id">
+          <template v-for="msg in messages" :key="msg.id">
+
             <div v-if="msg.type === 'system'" class="system-message">
               {{ msg.content }}
             </div>
-            <div v-else :class="['message-bubble', msg.user_id ===authStore.user.id  ? 'message-right' : 'message-left']">
+
+            <div v-else :class="['message-bubble', msg.user_id === authStore.user.id ? 'message-right' : 'message-left']">
               <div class="message-header">
-        <span class="username" :style="{ color: msg.user_color }">
-          {{ msg.username }}
-        </span>
+               <span class="username" :style="{ color: msg.user_color }">{{ msg.user_id === authStore.user.id ? msg.username : '客服小助手' }}</span>
                 <span class="time">{{ formatTime(msg.created_at) }}</span>
               </div>
               <div class="message-content">{{ msg.content }}</div>
             </div>
-          </div>
-
-          <div v-if="isConnected && messages.length === 0" class="welcome-message">
-            <p>👋 您好,我是客服助手</p>
-            <p>有什么可以帮您的吗?</p>
-          </div>
+            <div v-if="isConnected && messages.length === 0" class="welcome-message">
+              <p>👋 您好,我是客服助手</p>
+              <p>有什么可以帮您的吗?</p>
+            </div>
+          </template>
         </div>
 
         <div class="chat-input">
@@ -241,13 +240,13 @@ defineExpose({
 .chat-minimized {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #ff6700 0%, #ff8533 100%);
+  background: linear-gradient(135deg,  #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 103, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(152, 165, 238, 0.4);
   transition: transform 0.3s;
   position: relative;
 }
@@ -264,7 +263,7 @@ defineExpose({
   position: absolute;
   top: -5px;
   right: -5px;
-  background: #ff4d4f;
+  background: #667eea;
   color: white;
   border-radius: 10px;
   padding: 2px 6px;
@@ -287,7 +286,7 @@ defineExpose({
 }
 
 .chat-header {
-  background: linear-gradient(135deg, #ff6700 0%, #ff8533 100%);
+  background: linear-gradient(135deg,#667eea 0%, #764ba2 100%);
   color: white;
   padding: 16px;
   display: flex;
@@ -359,17 +358,6 @@ defineExpose({
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.message-left {
-  background-color: #fff;
-  border-radius: 12px 12px 12px 4px;
-  align-self: flex-start;
-}
-
-.message-right {
-  background-color: #007bff;
-  border-radius: 12px 12px 4px 12px;
-  align-self: flex-end;
-}
 
 .message-right .message-content {
   color: #fff;
@@ -384,6 +372,7 @@ defineExpose({
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
+  gap: 10px;
 }
 
 .username {
@@ -420,12 +409,12 @@ defineExpose({
 }
 
 .chat-input input:focus {
-  border-color: #ff6700;
+  border-color: #667eea;
 }
 
 .chat-input button {
   padding: 8px 16px;
-  background: #ff6700;
+  background: #667eea;
   color: white;
   border: none;
   border-radius: 4px;
@@ -435,7 +424,7 @@ defineExpose({
 }
 
 .chat-input button:hover:not(:disabled) {
-  background: #ff8533;
+  background: #764ba2;
 }
 
 .chat-input button:disabled {

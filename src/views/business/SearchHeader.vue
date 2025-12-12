@@ -8,7 +8,7 @@
           <div class="top-actions">
             <a href="#" class="link" @click.prevent="goToSellerLogin">卖家中心</a>
             <a href="#" class="link" @click.prevent="$emit('chat-click')">客户服务</a>
-            <a href="#" class="link" @click.prevent="$emit('profile-click')">我的订单</a>
+            <a v-if="authStore.isAuthenticated" href="#" class="link" @click.prevent="$emit('logout-click')">退出登录</a>
           </div>
         </div>
       </div>
@@ -36,9 +36,9 @@
               <span class="icon">🛒</span>
               <span class="text">购物车</span>
             </button>
-            <button class="action-btn" @click="$emit('profile-click')">
+            <button class="action-btn" @click="$emit('orders-click')">
               <span class="icon">👤</span>
-              <span class="text">我的</span>
+              <span class="text">我的订单</span>
             </button>
           </div>
         </div>
@@ -67,7 +67,8 @@ import BaseInput  from "@/views/base/BaseInput.vue";
 import BaseButton from "@/views/base/BaseButton.vue";
 import { useRouter } from 'vue-router'
 const router = useRouter()
-
+import {useAuthStore} from "@/stores/auth.js";
+const authStore = useAuthStore();
 const props = defineProps({
   title: {
     type: String,
@@ -75,7 +76,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['search', 'cart-click', 'profile-click','chat-click']);
+const emit = defineEmits(['search', 'cart-click', 'orders-click','chat-click','logout-click']);
 
 const searchQuery = ref('');
 
@@ -99,9 +100,6 @@ const goToSellerLogin = () => {
   transition: box-shadow 0.3s;
 }
 
-.site-header.is-fixed {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
 
 .container {
   max-width: 1200px;
@@ -140,7 +138,7 @@ const goToSellerLogin = () => {
 }
 
 .link:hover {
-  color: #ff6700;
+  color: #667eea;
 }
 
 /* 主导航 */
@@ -163,31 +161,17 @@ const goToSellerLogin = () => {
 .logo h1 {
   font-size: 24px;
   font-weight: bold;
-  color: #ff6700;
+  color:#667eea;
   margin: 0;
   line-height: 1;
 }
 
-.slogan {
-  font-size: 12px;
-  color: #999;
-}
 
 .search-box {
   flex: 1;
   max-width: 550px;
   display: flex;
   gap: 0;
-}
-
-.search-box .base-input {
-  border-radius: 4px 0 0 4px;
-  border-right: none;
-}
-
-.search-box .base-button {
-  border-radius: 0 4px 4px 0;
-  width: 100px;
 }
 
 .header-actions {
@@ -209,7 +193,7 @@ const goToSellerLogin = () => {
 }
 
 .action-btn:hover {
-  color: #ff6700;
+  color: #764ba2;
 }
 
 .action-btn .icon {
@@ -237,7 +221,7 @@ const goToSellerLogin = () => {
 
 .nav-item:hover,
 .nav-item.active {
-  color: #ff6700;
+  color:#667eea;
 }
 
 .nav-item.active::after {
@@ -247,7 +231,7 @@ const goToSellerLogin = () => {
   left: 0;
   right: 0;
   height: 2px;
-  background: #ff6700;
+  background: #667eea;
 }
 
 @media (max-width: 768px) {

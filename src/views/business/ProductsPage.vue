@@ -2,8 +2,9 @@
   <div class="home-page">
     <SearchHeader
         @search="handleSearch"
-        @cart-click="showLoginModal"
-        @profile-click="showLoginModal"
+        @cart-click="handleCart"
+        @orders-click="handleOrders"
+        @logout-click="authStore.logout"
         @chat-click="handleCustomerChatClick"
     />
 
@@ -333,7 +334,6 @@ const handleCategorySelect = (category) => {
 
 const handleProductClick = (product) => {
   showLoginModal();
-  console.log('查看商品:', product);
 };
 
 const handleReset = () => {
@@ -349,8 +349,24 @@ const showLoginModal = () => {
 
 const hideLoginModal = () => {
   isLoginModalVisible.value = false;
-  document.body.style.overflow = '';
 };
+
+// 购物车路由跳转
+const handleCart=()=>{
+  if (!authStore.isAuthenticated) {
+    isLoginModalVisible.value = true;
+  }else{
+    console.log('跳转到购物车页面');
+  }
+}
+// 订单路由跳转
+const handleOrders=()=>{
+  if (!authStore.isAuthenticated) {
+    isLoginModalVisible.value = true;
+  }else{
+    console.log('跳转到订单页面');
+  }
+}
 //  登录认证
 const handleOAuthLogin = async (provider) => {
   try {
@@ -419,7 +435,7 @@ onMounted(() => {
 }
 
 .result-count em {
-  color: #ff6700;
+  color: #667eea;
   font-style: normal;
   font-weight: bold;
   margin: 0 2px;
@@ -454,7 +470,7 @@ onMounted(() => {
 }
 
 .oauth-btn:hover {
-  border-color: #ff6700;
+  border-color: #667eea;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
@@ -477,11 +493,6 @@ onMounted(() => {
   transition: color 0.2s;
 }
 
-.sort-item:hover,
-.sort-item.active {
-  color: #ff6700;
-}
-
 .product-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -499,7 +510,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid #f0f0f0;
-  border-top-color: #ff6700;
+  border-top-color: #667eea;
   border-radius: 50%;
   margin: 0 auto 16px;
   animation: spin 0.8s linear infinite;
@@ -603,28 +614,6 @@ onMounted(() => {
   text-align: center;
 }
 
-.qr-code {
-  margin-bottom: 20px;
-}
-
-.qr-placeholder {
-  width: 200px;
-  height: 200px;
-  background: #fafafa;
-  border: 1px solid #e8e8e8;
-  border-radius: 4px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.qr-icon {
-  font-size: 48px;
-  opacity: 0.5;
-}
 
 .qr-placeholder p {
   margin: 0;
@@ -639,15 +628,9 @@ onMounted(() => {
 }
 
 .login-tip strong {
-  color: #ff6700;
+  color: #667eea;
 }
 
-.login-benefits {
-  text-align: left;
-  background: #fafafa;
-  padding: 12px 16px;
-  border-radius: 4px;
-}
 
 .login-benefits p {
   margin: 0;
@@ -657,16 +640,6 @@ onMounted(() => {
   line-height: 1.6;
 }
 
-/* 过渡动画 */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
 
 .modal-enter-active .modal-container,
 .modal-leave-active .modal-container {
