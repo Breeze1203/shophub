@@ -202,18 +202,29 @@
 </template>
 <script setup>
 import { ref } from "vue";
+import CookieUtil from "@/utils/CookieUtil.js";
 
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
 const rememberMe = ref(false);
+const savedEmail = CookieUtil.getCookie("remember_email");
+const savedPassword = CookieUtil.getCookie("remember_password");
 
+if (savedEmail) {
+    email.value = savedEmail;
+}
+
+if (savedPassword) {
+    password.value = savedPassword;
+}
 const props = defineProps({
   loading: {
     type: Boolean,
     default: false,
   },
 });
+
 
 // 定义向父组件发送的事件
 const emit = defineEmits(["login"]);

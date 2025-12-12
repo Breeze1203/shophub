@@ -16,7 +16,7 @@ const CookieUtil = {
                 return decodeURIComponent(c.substring(nameEQ.length));
             }
         }
-        return null;
+        return "";
     },
 
     // 删除 Cookie

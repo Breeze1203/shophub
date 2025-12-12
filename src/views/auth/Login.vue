@@ -162,10 +162,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth.js";
-import CookieUtil from "@/utils/CookieUtil.js";
 import OAuthButton from "@/views/base/OAuthButton.vue";
 import LoginForm from "../base/LoginForm.vue";
 const authStore = useAuthStore();
@@ -203,10 +202,6 @@ const handleAdminOAuthLogin = async (provider) => {
   loading.value = false;
 };
 
-onMounted(() => {
-  email.value = CookieUtil.getCookie("remembered_password");
-  password.value = CookieUtil.getCookie("remembered_email");
-});
 </script>
 
 <style scoped>
