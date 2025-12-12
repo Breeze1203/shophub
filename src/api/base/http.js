@@ -26,7 +26,7 @@ api.interceptors.request.use(
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
     (response) => response,
-    async (error) => {
+    async (error) => { 
         const originalRequest = error.config;
         if (originalRequest.url.includes('/login')) {
             return Promise.reject(error);

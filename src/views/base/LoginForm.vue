@@ -230,6 +230,8 @@ const props = defineProps({
 const emit = defineEmits(["login"]);
 // 提交处理
 const handleLocalLogin = () => {
+  console.log(rememberMe.value);
+  
   // 将数据打包发给父组件
   emit("login", {
     email: email.value,

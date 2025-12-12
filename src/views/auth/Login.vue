@@ -166,13 +166,15 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth.js";
 import OAuthButton from "@/views/base/OAuthButton.vue";
-import LoginForm from "../base/LoginForm.vue";
+import LoginForm from "@/views/base/LoginForm.vue";
 const authStore = useAuthStore();
 const router = useRouter();
 const loading = ref(false);
 const error = ref("");
 
 const handleLocalLogin = async (data) => {
+  console.log(data);
+  
   loading.value = true;
   error.value = "";
   const result = await authStore.login(
@@ -185,7 +187,6 @@ const handleLocalLogin = async (data) => {
   } else {
     error.value = result.error;
   }
-
   loading.value = false;
 };
 
