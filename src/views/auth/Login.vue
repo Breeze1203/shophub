@@ -174,7 +174,7 @@ const error = ref("");
 
 const handleLocalLogin = async (data) => {
   console.log(data);
-  
+
   loading.value = true;
   error.value = "";
   const result = await authStore.login(
@@ -470,7 +470,6 @@ const handleAdminOAuthLogin = async (provider) => {
 
 .signup-text {
   text-align: center;
-  margin-top: 32px;
   color: #6b7280;
   font-size: 14px;
 }

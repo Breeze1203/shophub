@@ -87,8 +87,8 @@
       </section>
     </div>
 
-    <!-- 登录弹窗 -->
-    <transition name="login-modal">
+    <transition name="login">
+      <!-- 登录弹窗 -->
       <div
         v-if="isLoginModalVisible"
         class="modal-mask"
@@ -119,10 +119,6 @@
                 :loading="authStore.isLoading"
                 @login="handleLocalLogin"
               />
-              <RegisterForm
-                :loading="authStore.isLoading"
-                @register="handleRegister"
-              />
               <!-- 分隔线 -->
               <div class="divider-new">
                 <span>或使用第三方登录</span>
@@ -144,6 +140,72 @@
             </div>
             <div class="footer-links">
               <p>登录即表示您同意我们的</p>
+              <div class="links">
+                <a href="#">服务条款</a>
+                <span>·</span>
+                <a href="#">隐私政策</a>
+                <span>·</span>
+                <a href="#">Cookie政策</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="register">
+      <!-- 注册弹窗 -->
+      <div
+          v-if="isRegisterModalVisible"
+          class="modal-mask"
+          @click="hideRegisterModal"
+      >
+        <div class="modal-wrapper">
+          <div
+              class="modal-container"
+              @click.stop
+          >
+            <div class="modal-header">
+              <h3>选择注册方式</h3>
+              <button
+                  class="modal-close"
+                  @click="hideRegisterModal"
+              >×</button>
+            </div>
+            <div class="modal-body">
+              <!-- 错误提示 -->
+              <div
+                  v-if="error"
+                  class="error-alert"
+              >
+                {{ error }}
+              </div>
+              <!-- 注册表单 -->
+              <RegisterForm
+                  :loading="authStore.isLoading"
+                  @login="handleLocalLogin"
+              />
+              <!-- 分隔线 -->
+              <div class="divider-new">
+                <span>或使用第三方注册</span>
+              </div>
+
+              <!-- 第三方注册 -->
+              <div class="oauth-grid">
+                <OAuthButton
+                    v-for="provider in authStore.availableProviders"
+                    :key="provider"
+                    :provider="provider"
+                    @login-click="handleAdminOAuthLogin"
+                />
+              </div>
+              <p class="signup-text">
+                已有账户？
+                <a>立即登录</a>
+              </p>
+            </div>
+            <div class="footer-links">
+              <p>注册即表示您同意我们的</p>
               <div class="links">
                 <a href="#">服务条款</a>
                 <span>·</span>
@@ -589,31 +651,6 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-.oauth-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 14px 20px;
-  border: 1px solid #e1e4e8;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  width: 100%;
-}
-
-.oauth-btn:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-
-.provider-text {
-  font-weight: 500;
-}
 
 /* 手机端两列 */
 @media (min-width: 480px) {
@@ -704,7 +741,7 @@ onMounted(() => {
 }
 
 .modal-container {
-  width: 400px;
+  width: 450px;
   background-color: #fff;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
@@ -746,14 +783,13 @@ onMounted(() => {
 }
 
 .modal-body {
-  padding: 30px 24px;
-  text-align: center;
+  padding: 10px 24px;
 }
 .divider-new {
   position: relative;
   display: flex;
   align-items: center;
-  margin: 24px 0;
+  margin: 10px 0;
   color: #9ca3af;
   font-size: 14px;
 }
@@ -776,7 +812,7 @@ onMounted(() => {
 }
 .signup-text {
   text-align: center;
-  margin-top: 32px;
+  margin-top: 10px;
   color: #6b7280;
   font-size: 14px;
 }
@@ -785,7 +821,7 @@ onMounted(() => {
 }
 
 .footer-links {
-  margin-top: 32px;
+  margin-bottom: 10px;
   text-align: center;
   font-size: 12px;
   color: #9ca3af;
@@ -816,12 +852,6 @@ onMounted(() => {
   margin: 0;
   color: #ccc;
   font-size: 12px;
-}
-
-.login-tip {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 20px;
 }
 
 .login-tip strong {
