@@ -1,11 +1,11 @@
 <template>
   <div class="home-page">
     <SearchHeader
-        @search="handleSearch"
-        @cart-click="handleCart"
-        @orders-click="handleOrders"
-        @logout-click="authStore.logout"
-        @chat-click="handleCustomerChatClick"
+      @search="handleSearch"
+      @cart-click="handleCart"
+      @orders-click="handleOrders"
+      @logout-click="authStore.logout"
+      @chat-click="handleCustomerChatClick"
     />
 
     <div class="page-container">
@@ -15,9 +15,9 @@
           <h2 class="section-title">全部分类</h2>
         </div>
         <CategoryList
-            :categories="categories"
-            :active-id="activeCategoryId"
-            @select="handleCategorySelect"
+          :categories="categories"
+          :active-id="activeCategoryId"
+          @select="handleCategorySelect"
         />
       </section>
 
@@ -26,140 +26,255 @@
         <div class="section-header">
           <h2 class="section-title">{{ listTitle }}</h2>
           <div class="section-extra">
-            <span v-if="filteredProducts.length > 0" class="result-count">
+            <span
+              v-if="filteredProducts.length > 0"
+              class="result-count"
+            >
               共<em>{{ filteredProducts.length }}</em>件商品
             </span>
             <div class="sort-options">
-              <a href="#" :class="['sort-item', { active: sortType === 'default' }]"
-                 @click.prevent="sortType = 'default'">默认</a>
-              <a href="#" :class="['sort-item', { active: sortType === 'price' }]" @click.prevent="sortType = 'price'">价格</a>
-              <a href="#" :class="['sort-item', { active: sortType === 'time' }]"
-                 @click.prevent="sortType = 'time'">最新</a>
+              <a
+                href="#"
+                :class="['sort-item', { active: sortType === 'default' }]"
+                @click.prevent="sortType = 'default'"
+              >默认</a>
+              <a
+                href="#"
+                :class="['sort-item', { active: sortType === 'price' }]"
+                @click.prevent="sortType = 'price'"
+              >价格</a>
+              <a
+                href="#"
+                :class="['sort-item', { active: sortType === 'time' }]"
+                @click.prevent="sortType = 'time'"
+              >最新</a>
             </div>
           </div>
         </div>
 
-        <div v-if="loading" class="loading-state">
+        <div
+          v-if="loading"
+          class="loading-state"
+        >
           <div class="spinner"></div>
           <p>加载中...</p>
         </div>
 
-        <div v-else-if="filteredProducts.length === 0" class="empty-state">
+        <div
+          v-else-if="filteredProducts.length === 0"
+          class="empty-state"
+        >
           <div class="empty-icon">📦</div>
           <p class="empty-text">暂无商品</p>
-          <BaseButton variant="secondary" size="small" @click="handleReset">查看全部商品</BaseButton>
+          <BaseButton
+            variant="secondary"
+            size="small"
+            @click="handleReset"
+          >查看全部商品</BaseButton>
         </div>
 
-        <div v-else class="product-list">
+        <div
+          v-else
+          class="product-list"
+        >
           <ProductCard
-              v-for="product in filteredProducts"
-              :key="product.id"
-              :product="product"
-              @click="handleProductClick"
+            v-for="product in filteredProducts"
+            :key="product.id"
+            :product="product"
+            @click="handleProductClick"
           />
         </div>
       </section>
     </div>
 
     <!-- 登录弹窗 -->
-    <transition name="modal">
-      <div v-if="isLoginModalVisible" class="modal-mask" @click="hideLoginModal">
+    <transition name="login-modal">
+      <div
+        v-if="isLoginModalVisible"
+        class="modal-mask"
+        @click="hideLoginModal"
+      >
         <div class="modal-wrapper">
-          <div class="modal-container" @click.stop>
+          <div
+            class="modal-container"
+            @click.stop
+          >
             <div class="modal-header">
               <h3>选择登录方式</h3>
-              <button class="modal-close" @click="hideLoginModal">×</button>
+              <button
+                class="modal-close"
+                @click="hideLoginModal"
+              >×</button>
             </div>
             <div class="modal-body">
-              <!-- 新的 OAuth 登录网格 -->
-              <div class="oauth-grid">
-                <button
-                    v-for="provider in authStore.availableProviders"
-                    :key="provider"
-                    @click="handleOAuthLogin(provider)"
-                    class="oauth-btn"
-                    :class="`oauth-btn-${provider}`"
-                >
-                  <!-- Google 图标 -->
-                  <svg v-if="provider === 'google'" width="20" height="20" viewBox="0 0 24 24">
-                    <path
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                        fill="#4285F4"/>
-                    <path
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                        fill="#34A853"/>
-                    <path
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                        fill="#FBBC05"/>
-                    <path
-                        d="M12 6.75c1.63 0 3.06.56 4.21 1.65l3.15-3.15C16.94 2.26 14.54 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                        fill="#EA4335"/>
-                  </svg>
-
-                  <!-- GitHub 图标 -->
-                  <svg v-else-if="provider === 'github'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.797 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                  </svg>
-
-                  <!-- 微信图标（绿色官方色） -->
-                  <svg v-else-if="provider === 'wechat'" width="20" height="20" viewBox="0 0 24 24" fill="#07C160">
-                    <path
-                        d="M9.5 4.5C6.462 4.5 4 6.96 4 9.99c0 1.97 1.113 3.698 2.837 4.586.374.193.506.68.306 1.04l-.56 1.058c-.19.36.14.786.518.786.155 0 .318-.07.418-.197l1.284-1.208c.236-.222.553-.32.87-.27 1.28.2 2.645-.077 3.827-1.005 1.054-2.04.666-4.462-.948-6.03C11.724 6.888 10.7 4.5 9.5 4.5z"/>
-                    <path
-                        d="M19.5 14.5c-3.038 0-5.5 2.46-5.5 5.5 0 1.63.715 3.182 1.96 4.242.374.32.47.88.237 1.302l-.56 1.058c-.19.36.14.786.518.786.155 0 .318-.07.418-.197l1.284-1.208c.236-.222.553-.32.87-.27 1.28.2 2.645-.077 3.827-1.005 1.054-2.04.666-4.462-.948-6.03-.832-1.862-1.856-4.25-3.106-4.25z"/>
-                  </svg>
-
-                  <!-- 显示文字 -->
-                  <span class="provider-text">{{
-                      provider === 'google' ? 'Google' : provider === 'github' ? 'GitHub' : '微信'
-                    }} 登录</span>
-                </button>
+              <!-- 错误提示 -->
+              <div
+                v-if="error"
+                class="error-alert"
+              >
+                {{ error }}
+              </div>
+              <!-- 登录表单 -->
+              <LoginForm
+                :loading="authStore.isLoading"
+                @login="handleLocalLogin"
+              />
+              <RegisterForm
+                :loading="authStore.isLoading"
+                @register="handleRegister"
+              />
+              <!-- 分隔线 -->
+              <div class="divider-new">
+                <span>或使用第三方登录</span>
               </div>
 
-              <p class="login-tip" style="margin-top: 24px; color: #999;">
-                授权即代表您同意 <a href="#" style="color: #ff6700;">《用户协议》</a> 和 <a href="#"
-                                                                                          style="color: #ff6700;">《隐私政策》</a>
+              <!-- 第三方登录 -->
+              <div class="oauth-grid">
+                <OAuthButton
+                  v-for="provider in authStore.availableProviders"
+                  :key="provider"
+                  :provider="provider"
+                  @login-click="handleAdminOAuthLogin"
+                />
+              </div>
+              <p class="signup-text">
+                还没有账户？
+                <a>立即注册</a>
               </p>
+            </div>
+            <div class="footer-links">
+              <p>登录即表示您同意我们的</p>
+              <div class="links">
+                <a href="#">服务条款</a>
+                <span>·</span>
+                <a href="#">隐私政策</a>
+                <span>·</span>
+                <a href="#">Cookie政策</a>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </transition>
-
     <!-- 客服聊天组件 -->
     <CustomerServiceChat
-        v-if="authStore.isAuthenticated"
-        ref="customerServiceRef"
-        :token="authStore.accessToken"
+      v-if="authStore.isAuthenticated"
+      ref="customerServiceRef"
+      :token="authStore.accessToken"
     />
   </div>
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue';
+import { ref, computed, onMounted } from "vue";
 import SearchHeader from "@/views/business/SearchHeader.vue";
 import CategoryList from "@/views/business/CategoryList.vue";
 import ProductCard from "@/views/business/ProductCard.vue";
 import BaseButton from "@/views/base/BaseButton.vue";
 import CustomerServiceChat from "@/components/CustomerServiceChat.vue";
-import {useAuthStore} from "@/stores/auth.js";
+import LoginForm from "@/views/base/LoginForm.vue";
+import OAuthButton from "@/views/base/OAuthButton.vue";
+import RegisterForm from "@/views/base/RegisterForm.vue";
+import { useAuthStore } from "@/stores/auth.js";
 const customerServiceRef = ref(null);
+const error = ref("");
 
 const authStore = useAuthStore();
+
+const handleLocalLogin = async (data) => {
+  console.log(data);
+
+  loading.value = true;
+  error.value = "";
+  const result = await authStore.login(
+    data.email,
+    data.password,
+    data.rememberMe
+  );
+  if (result.success) {
+    router.push("/dashboard/home");
+  } else {
+    error.value = result.error;
+  }
+  loading.value = false;
+};
+
+const handleAdminOAuthLogin = async (provider) => {
+  loading.value = true;
+  error.value = "";
+  try {
+    await authStore.loginWithOAuth(provider, "merchant");
+    router.push("/dashboard/home");
+  } catch (err) {
+    error.value = err.message || "OAuth登录失败";
+  }
+
+  loading.value = false;
+};
+const handleRegister = async (formData) => {
+  loading.value = true;
+  error.value = "";
+  success.value = "";
+
+  // 验证密码匹配
+  if (formData.password !== formData.confirmPassword) {
+    error.value = "两次输入的密码不一致";
+    loading.value = false;
+    return;
+  }
+
+  // 验证密码长度
+  if (formData.password.length < 8) {
+    error.value = "密码至少需要8位字符";
+    loading.value = false;
+    return;
+  }
+
+  const result = await authStore.register(
+    formData.email,
+    formData.username,
+    formData.password,
+    "merchant"
+  );
+
+  if (result.success) {
+    success.value = "注册成功！正在跳转...";
+    setTimeout(() => {
+      router.push("/dashboard/home");
+    }, 1500);
+  } else {
+    error.value = result.error;
+  }
+
+  loading.value = false;
+};
+
+const handleOAuthSignup = async (provider) => {
+  loading.value = true;
+  error.value = "";
+
+  try {
+    await authStore.loginWithOAuth(provider, "merchant");
+    router.push("/dashboard/home");
+  } catch (err) {
+    error.value = err.message || "OAuth注册失败";
+  }
+
+  loading.value = false;
+};
 // Mock API
 const mockApi = {
   async getCategories() {
     await this.delay(300);
     return [
-      {id: 1, name: '数码电子', icon: '📱'},
-      {id: 2, name: '服装配饰', icon: '👕'},
-      {id: 3, name: '图书音像', icon: '📚'},
-      {id: 4, name: '家居家电', icon: '🏠'},
-      {id: 5, name: '游戏设备', icon: '🎮'},
-      {id: 6, name: '文创手工', icon: '🎨'},
-      {id: 7, name: '运动户外', icon: '⚽'},
-      {id: 8, name: '美妆护肤', icon: '💄'}
+      { id: 1, name: "数码电子", icon: "📱" },
+      { id: 2, name: "服装配饰", icon: "👕" },
+      { id: 3, name: "图书音像", icon: "📚" },
+      { id: 4, name: "家居家电", icon: "🏠" },
+      { id: 5, name: "游戏设备", icon: "🎮" },
+      { id: 6, name: "文创手工", icon: "🎨" },
+      { id: 7, name: "运动户外", icon: "⚽" },
+      { id: 8, name: "美妆护肤", icon: "💄" },
     ];
   },
 
@@ -168,130 +283,131 @@ const mockApi = {
     return [
       {
         id: 1,
-        title: '苹果 iPhone 13 Pro 256G 远峰蓝 国行正品',
+        title: "苹果 iPhone 13 Pro 256G 远峰蓝 国行正品",
         price: 4999,
         originalPrice: 7999,
-        condition: '95新',
-        image: 'iPhone 13 Pro',
+        condition: "95新",
+        image: "iPhone 13 Pro",
         categoryId: 1,
-        views: 128
+        views: 128,
       },
       {
         id: 2,
-        title: 'MacBook Air M1 8G+256G 2020款 银色 轻薄便携',
+        title: "MacBook Air M1 8G+256G 2020款 银色 轻薄便携",
         price: 5299,
         originalPrice: 7999,
-        condition: '90新',
-        image: 'MacBook Air',
+        condition: "90新",
+        image: "MacBook Air",
         categoryId: 1,
-        views: 89
+        views: 89,
       },
       {
         id: 3,
-        title: 'Apple AirPods Pro 2代 主动降噪 无线充电',
+        title: "Apple AirPods Pro 2代 主动降噪 无线充电",
         price: 1299,
         originalPrice: 1899,
-        condition: '99新',
-        image: 'AirPods Pro',
+        condition: "99新",
+        image: "AirPods Pro",
         categoryId: 1,
-        views: 256
+        views: 256,
       },
       {
         id: 4,
-        title: '索尼A7M3 全画幅微单相机 含镜头套装',
+        title: "索尼A7M3 全画幅微单相机 含镜头套装",
         price: 8999,
         originalPrice: 13999,
-        condition: '85新',
-        image: '索尼相机',
+        condition: "85新",
+        image: "索尼相机",
         categoryId: 1,
-        views: 67
+        views: 67,
       },
       {
         id: 5,
-        title: 'Nintendo Switch 续航版 国行 游戏机',
+        title: "Nintendo Switch 续航版 国行 游戏机",
         price: 1699,
         originalPrice: 2099,
-        condition: '95新',
-        image: 'Switch',
+        condition: "95新",
+        image: "Switch",
         categoryId: 5,
-        views: 145
+        views: 145,
       },
       {
         id: 6,
-        title: '戴森 Dyson HD08 吹风机 红色 高端护发',
+        title: "戴森 Dyson HD08 吹风机 红色 高端护发",
         price: 1899,
         originalPrice: 2990,
-        condition: '90新',
-        image: '戴森',
+        condition: "90新",
+        image: "戴森",
         categoryId: 4,
-        views: 98
+        views: 98,
       },
       {
         id: 7,
-        title: 'iPad Pro 2021 11寸 256G WiFi版 深空灰',
+        title: "iPad Pro 2021 11寸 256G WiFi版 深空灰",
         price: 4299,
         originalPrice: 6299,
-        condition: '95新',
-        image: 'iPad',
+        condition: "95新",
+        image: "iPad",
         categoryId: 1,
-        views: 176
+        views: 176,
       },
       {
         id: 8,
-        title: 'Sony WH-1000XM5 降噪耳机 黑色 旗舰级音质',
+        title: "Sony WH-1000XM5 降噪耳机 黑色 旗舰级音质",
         price: 1899,
         originalPrice: 2799,
-        condition: '99新',
-        image: '索尼耳机',
+        condition: "99新",
+        image: "索尼耳机",
         categoryId: 1,
-        views: 203
+        views: 203,
       },
       {
         id: 9,
-        title: 'Kindle Paperwhite 第11代 8G 墨水屏阅读器',
+        title: "Kindle Paperwhite 第11代 8G 墨水屏阅读器",
         price: 599,
         originalPrice: 998,
-        condition: '95新',
-        image: 'Kindle',
+        condition: "95新",
+        image: "Kindle",
         categoryId: 3,
-        views: 134
+        views: 134,
       },
       {
         id: 10,
-        title: '小米扫地机器人 Pro 智能规划 自动回充',
+        title: "小米扫地机器人 Pro 智能规划 自动回充",
         price: 1299,
         originalPrice: 2199,
-        condition: '90新',
-        image: '扫地机器人',
+        condition: "90新",
+        image: "扫地机器人",
         categoryId: 4,
-        views: 87
-      }
+        views: 87,
+      },
     ];
   },
 
   delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  },
 };
 
 const categories = ref([]);
 const products = ref([]);
 const loading = ref(false);
 const activeCategoryId = ref(null);
-const searchKeyword = ref('');
+const searchKeyword = ref("");
 const isLoginModalVisible = ref(false);
-const sortType = ref('default');
+const isRegisterModalVisible = ref(false);
+const sortType = ref("default");
 
 const filteredProducts = computed(() => {
   let result = products.value;
 
   if (activeCategoryId.value) {
-    result = result.filter(p => p.categoryId === activeCategoryId.value);
+    result = result.filter((p) => p.categoryId === activeCategoryId.value);
   }
 
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase();
-    result = result.filter(p => p.title.toLowerCase().includes(keyword));
+    result = result.filter((p) => p.title.toLowerCase().includes(keyword));
   }
 
   return result;
@@ -300,10 +416,12 @@ const filteredProducts = computed(() => {
 const listTitle = computed(() => {
   if (searchKeyword.value) return `"${searchKeyword.value}" 的搜索结果`;
   if (activeCategoryId.value) {
-    const category = categories.value.find(c => c.id === activeCategoryId.value);
-    return category ? category.name : '推荐商品';
+    const category = categories.value.find(
+      (c) => c.id === activeCategoryId.value
+    );
+    return category ? category.name : "推荐商品";
   }
-  return '推荐商品';
+  return "推荐商品";
 });
 
 const fetchData = async () => {
@@ -311,12 +429,12 @@ const fetchData = async () => {
   try {
     const [cats, prods] = await Promise.all([
       mockApi.getCategories(),
-      mockApi.getProducts()
+      mockApi.getProducts(),
     ]);
     categories.value = cats;
     products.value = prods;
   } catch (error) {
-    console.error('获取数据失败:', error);
+    console.error("获取数据失败:", error);
   } finally {
     loading.value = false;
   }
@@ -328,8 +446,9 @@ const handleSearch = (keyword) => {
 };
 
 const handleCategorySelect = (category) => {
-  activeCategoryId.value = activeCategoryId.value === category.id ? null : category.id;
-  searchKeyword.value = '';
+  activeCategoryId.value =
+    activeCategoryId.value === category.id ? null : category.id;
+  searchKeyword.value = "";
 };
 
 const handleProductClick = (product) => {
@@ -338,7 +457,7 @@ const handleProductClick = (product) => {
 
 const handleReset = () => {
   activeCategoryId.value = null;
-  searchKeyword.value = '';
+  searchKeyword.value = "";
 };
 
 const showLoginModal = () => {
@@ -351,30 +470,39 @@ const hideLoginModal = () => {
   isLoginModalVisible.value = false;
 };
 
+const showRegisterModal = () => {
+  isRegisterModalVisible.value = true;
+};
+
+const hideRegisterModal = () => {
+  isRegisterModalVisible.value = false;
+};
+
 // 购物车路由跳转
-const handleCart=()=>{
+const handleCart = () => {
   if (!authStore.isAuthenticated) {
     isLoginModalVisible.value = true;
-  }else{
-    console.log('跳转到购物车页面');
+  } else {
+    console.log("跳转到购物车页面");
   }
-}
+};
 // 订单路由跳转
-const handleOrders=()=>{
+const handleOrders = () => {
   if (!authStore.isAuthenticated) {
     isLoginModalVisible.value = true;
-  }else{
-    console.log('跳转到订单页面');
+  } else {
+    console.log("跳转到订单页面");
   }
-}
+};
+
 //  登录认证
 const handleOAuthLogin = async (provider) => {
   try {
-    await authStore.loginWithOAuth(provider,'client');
+    await authStore.loginWithOAuth(provider, "client");
     hideLoginModal();
     await customerServiceRef.value?.openChat();
   } catch (err) {
-    console.log('登录失败')
+    console.log("登录失败");
   }
 };
 
@@ -445,7 +573,15 @@ onMounted(() => {
   display: flex;
   gap: 16px;
 }
-
+.error-alert {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+}
 .oauth-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -613,7 +749,68 @@ onMounted(() => {
   padding: 30px 24px;
   text-align: center;
 }
+.divider-new {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  color: #9ca3af;
+  font-size: 14px;
+}
 
+.divider-new::before,
+.divider-new::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #d1d5db;
+}
+
+.divider-new span {
+  padding: 0 16px;
+}
+.oauth-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.signup-text {
+  text-align: center;
+  margin-top: 32px;
+  color: #6b7280;
+  font-size: 14px;
+}
+.signup-text a:hover {
+  color: #5568d3;
+}
+
+.footer-links {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.footer-links p {
+  margin: 0 0 4px 0;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.links a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.links a:hover {
+  color: #374151;
+}
 
 .qr-placeholder p {
   margin: 0;
@@ -631,7 +828,6 @@ onMounted(() => {
   color: #667eea;
 }
 
-
 .login-benefits p {
   margin: 0;
   padding: 4px 0;
@@ -639,7 +835,6 @@ onMounted(() => {
   font-size: 12px;
   line-height: 1.6;
 }
-
 
 .modal-enter-active .modal-container,
 .modal-leave-active .modal-container {

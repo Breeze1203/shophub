@@ -172,9 +172,9 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     // Local login
-    const login = async (email, password) => {
+    const login = async (email, password,rememberMe) => {
         try {
-            const data = await authAPI.login(email, password);
+            const data = await authAPI.login(email, password, rememberMe);
             setAuth(data);
             return { success: true };
         } catch (error) {

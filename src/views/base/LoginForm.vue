@@ -208,8 +208,8 @@ const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
 const rememberMe = ref(false);
-const savedEmail = CookieUtil.getCookie("remember_email");
-const savedPassword = CookieUtil.getCookie("remember_password");
+const savedEmail = CookieUtil.getCookie("remembered_email");
+const savedPassword = CookieUtil.getCookie("remembered_password");
 
 if (savedEmail) {
     email.value = savedEmail;
@@ -230,8 +230,6 @@ const props = defineProps({
 const emit = defineEmits(["login"]);
 // 提交处理
 const handleLocalLogin = () => {
-  console.log(rememberMe.value);
-  
   // 将数据打包发给父组件
   emit("login", {
     email: email.value,

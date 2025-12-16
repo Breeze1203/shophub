@@ -199,9 +199,10 @@ const handleLogout = () => {
 
 /* ===== 主内容区 ===== */
 .main-content {
-  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
   padding: 14px;
+  height: calc(100vh - 68px); /* 减去 header 的高度 */
 }
 
 .prototype-container {
@@ -209,7 +210,7 @@ const handleLogout = () => {
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   display: flex;
-  min-height: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -228,9 +229,7 @@ const handleLogout = () => {
 
 .nav-item {
   text-decoration: none;
-  /* 你可能还需要设置一个颜色，因为链接的默认颜色也可能
-     和你的设计不符 */
-  color: inherit; /* 举个例子：继承父元素的颜色 */
+  color: inherit;
 }
 
 .nav-item {

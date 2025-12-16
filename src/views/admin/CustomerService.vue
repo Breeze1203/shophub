@@ -216,7 +216,7 @@ onMounted(() => {
 <style scoped>
 .admin-customer-service {
   display: flex;
-  height: 100vh;
+  height: 80vh;
   background: #f5f5f5;
 }
 

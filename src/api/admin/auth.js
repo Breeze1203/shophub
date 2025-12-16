@@ -19,10 +19,11 @@ export const authAPI = {
         return response.data;
     },
 
-    async login(email, password) {
+    async login(email, password,rememberMe) {
         const response = await api.post('/auth/login', {
             email,
             password,
+            rememberMe,
         });
         return response.data;
     },
