@@ -73,7 +73,7 @@
         <nav class="nav-list">
           <a
             class="nav-item"
-            @click="handleSelectCategory(0)"
+            @click.prevent="$emit('handle-category',0)"
           >
             首页
           </a>
@@ -82,7 +82,7 @@
             v-for="item in categories"
             :key="item.id"
             class="nav-item"
-            @click="handleSelectCategory(item.id)"
+            @click.prevent="$emit('handle-category',item.id)"
           >
             {{ item.name }}
           </a>
@@ -267,27 +267,17 @@ const goToSellerLogin = () => {
 }
 
 .nav-item {
-  color: #667eea 0%;
+  color: #667eea;
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s;
   position: relative;
 }
 
-.nav-item:hover,
-.nav-item.active {
-  color: #667eea;
+.nav-item:hover{
+  color: #764ba2;
 }
 
-.nav-item.active::after {
-  content: "";
-  position: absolute;
-  bottom: -12px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #764ba2 100%;
-}
 
 @media (max-width: 768px) {
   .top-bar {

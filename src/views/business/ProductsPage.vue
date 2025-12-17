@@ -6,6 +6,7 @@
       @orders-click="handleOrders"
       @logout-click="authStore.logout"
       @chat-click="handleCustomerChatClick"
+      @handle-category="handleCategoryTab"
     />
 
     <div class="page-container">
@@ -427,8 +428,8 @@ const mockApi = {
     return new Promise((resolve) => setTimeout(resolve, ms));
   },
 };
-
-const categories = ref([]);
+const allCategories=ref([]);
+const currentId=ref(0); //当前分类id
 const products = ref([]);
 const loading = ref(false);
 const activeCategoryId = ref(null);
@@ -437,6 +438,17 @@ const isLoginModalVisible = ref(false);
 const isRegisterModalVisible = ref(false);
 const sortType = ref("default");
 
+// 计算分类信息
+const categories = computed(() => {
+  if (currentId.value === 0) {
+    return allCategories.value.flatMap(cat => cat.children || [])
+  } else {
+    const category = allCategories.value.find(cat => cat.id === currentId.value)
+    return category ? (category.children || []) : []
+  }
+})
+
+// 过滤产品信息
 const filteredProducts = computed(() => {
   let result = products.value;
 
@@ -471,7 +483,7 @@ const fetchData = async () => {
       productApi.getCategories(),
       mockApi.getProducts(),
     ]);
-    categories.value = cats.data;
+    allCategories.value = cats.data;
     products.value = prods;
   } catch (error) {
     console.error("获取数据失败:", error);
@@ -485,6 +497,10 @@ const handleSearch = (keyword) => {
   activeCategoryId.value = null;
 };
 
+// 切换导航分类路由
+const handleCategoryTab=(id)=>{
+  currentId.value = id
+}
 const handleCategorySelect = (category) => {
   activeCategoryId.value =
     activeCategoryId.value === category.id ? null : category.id;
