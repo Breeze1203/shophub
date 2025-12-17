@@ -3,7 +3,7 @@ import api from "@/api/base/http.js";
 export const productApi = {
     // 获取商品分类列表
     getCategories() {
-        return api.get('/categories');
+        return api.get('/public/categories').then(res => res.data);
     },
 
     // 获取商品列表

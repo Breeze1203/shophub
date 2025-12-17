@@ -130,12 +130,12 @@
                   v-for="provider in authStore.availableProviders"
                   :key="provider"
                   :provider="provider"
-                  @login-click="handleAdminOAuthLogin"
+                  @login-click="handleOAuthLogin"
                 />
               </div>
               <p class="signup-text">
                 还没有账户？
-                <a>立即注册</a>
+                <a @click="switchType('register')">立即注册</a>
               </p>
             </div>
             <div class="footer-links">
@@ -156,34 +156,34 @@
     <transition name="register">
       <!-- 注册弹窗 -->
       <div
-          v-if="isRegisterModalVisible"
-          class="modal-mask"
-          @click="hideRegisterModal"
+        v-if="isRegisterModalVisible"
+        class="modal-mask"
+        @click="hideRegisterModal"
       >
         <div class="modal-wrapper">
           <div
-              class="modal-container"
-              @click.stop
+            class="modal-container"
+            @click.stop
           >
             <div class="modal-header">
               <h3>选择注册方式</h3>
               <button
-                  class="modal-close"
-                  @click="hideRegisterModal"
+                class="modal-close"
+                @click="hideRegisterModal"
               >×</button>
             </div>
             <div class="modal-body">
               <!-- 错误提示 -->
               <div
-                  v-if="error"
-                  class="error-alert"
+                v-if="error"
+                class="error-alert"
               >
                 {{ error }}
               </div>
               <!-- 注册表单 -->
               <RegisterForm
-                  :loading="authStore.isLoading"
-                  @login="handleLocalLogin"
+                :loading="authStore.isLoading"
+                @login="handleRegister"
               />
               <!-- 分隔线 -->
               <div class="divider-new">
@@ -193,15 +193,15 @@
               <!-- 第三方注册 -->
               <div class="oauth-grid">
                 <OAuthButton
-                    v-for="provider in authStore.availableProviders"
-                    :key="provider"
-                    :provider="provider"
-                    @login-click="handleAdminOAuthLogin"
+                  v-for="provider in authStore.availableProviders"
+                  :key="provider"
+                  :provider="provider"
+                  @login-click="handleOAuthSignup"
                 />
               </div>
               <p class="signup-text">
                 已有账户？
-                <a>立即登录</a>
+                <a @click="switchType('login')">立即登录</a>
               </p>
             </div>
             <div class="footer-links">
@@ -240,12 +240,11 @@ import RegisterForm from "@/views/base/RegisterForm.vue";
 import { useAuthStore } from "@/stores/auth.js";
 const customerServiceRef = ref(null);
 const error = ref("");
+import { productApi } from "@/api/business/product";
 
 const authStore = useAuthStore();
 
 const handleLocalLogin = async (data) => {
-  console.log(data);
-
   loading.value = true;
   error.value = "";
   const result = await authStore.login(
@@ -254,23 +253,10 @@ const handleLocalLogin = async (data) => {
     data.rememberMe
   );
   if (result.success) {
-    router.push("/dashboard/home");
+    success.value = "登录成功!";
   } else {
     error.value = result.error;
   }
-  loading.value = false;
-};
-
-const handleAdminOAuthLogin = async (provider) => {
-  loading.value = true;
-  error.value = "";
-  try {
-    await authStore.loginWithOAuth(provider, "merchant");
-    router.push("/dashboard/home");
-  } catch (err) {
-    error.value = err.message || "OAuth登录失败";
-  }
-
   loading.value = false;
 };
 const handleRegister = async (formData) => {
@@ -296,14 +282,11 @@ const handleRegister = async (formData) => {
     formData.email,
     formData.username,
     formData.password,
-    "merchant"
+    "client"
   );
 
   if (result.success) {
-    success.value = "注册成功！正在跳转...";
-    setTimeout(() => {
-      router.push("/dashboard/home");
-    }, 1500);
+    success.value = "注册成功!";
   } else {
     error.value = result.error;
   }
@@ -316,30 +299,24 @@ const handleOAuthSignup = async (provider) => {
   error.value = "";
 
   try {
-    await authStore.loginWithOAuth(provider, "merchant");
-    router.push("/dashboard/home");
+    await authStore.loginWithOAuth(provider, "client");
   } catch (err) {
     error.value = err.message || "OAuth注册失败";
   }
-
   loading.value = false;
+};
+
+const switchType = (type) => {
+  if (type === "register") {
+    isLoginModalVisible.value = false;
+    isRegisterModalVisible.value = true;
+  } else {
+    isLoginModalVisible.value = true;
+    isRegisterModalVisible.value = false;
+  }
 };
 // Mock API
 const mockApi = {
-  async getCategories() {
-    await this.delay(300);
-    return [
-      { id: 1, name: "数码电子", icon: "📱" },
-      { id: 2, name: "服装配饰", icon: "👕" },
-      { id: 3, name: "图书音像", icon: "📚" },
-      { id: 4, name: "家居家电", icon: "🏠" },
-      { id: 5, name: "游戏设备", icon: "🎮" },
-      { id: 6, name: "文创手工", icon: "🎨" },
-      { id: 7, name: "运动户外", icon: "⚽" },
-      { id: 8, name: "美妆护肤", icon: "💄" },
-    ];
-  },
-
   async getProducts() {
     await this.delay(500);
     return [
@@ -489,11 +466,12 @@ const listTitle = computed(() => {
 const fetchData = async () => {
   loading.value = true;
   try {
+    // 并发请求
     const [cats, prods] = await Promise.all([
-      mockApi.getCategories(),
+      productApi.getCategories(),
       mockApi.getProducts(),
     ]);
-    categories.value = cats;
+    categories.value = cats.data;
     products.value = prods;
   } catch (error) {
     console.error("获取数据失败:", error);
@@ -530,10 +508,6 @@ const showLoginModal = () => {
 
 const hideLoginModal = () => {
   isLoginModalVisible.value = false;
-};
-
-const showRegisterModal = () => {
-  isRegisterModalVisible.value = true;
 };
 
 const hideRegisterModal = () => {
@@ -650,7 +624,6 @@ onMounted(() => {
   gap: 12px;
   margin-top: 10px;
 }
-
 
 /* 手机端两列 */
 @media (min-width: 480px) {

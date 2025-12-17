@@ -90,7 +90,7 @@ router.beforeEach(async (to, from, next) => {
         await authStore.init()
     }
     // 客户的话
-    if (to.meta.requiresAdmin && authStore.user.type==='client') {
+    if (to.meta.requiresAdmin && authStore.user?.type==='client') {
         // 拒绝访问，踢回首页或显示 403 页面
         return next({path: '/'})
     }

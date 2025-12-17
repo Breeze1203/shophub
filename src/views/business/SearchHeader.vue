@@ -6,9 +6,22 @@
         <div class="top-nav">
           <span class="welcome">欢迎来到怪叽叽!</span>
           <div class="top-actions">
-            <a href="#" class="link" @click.prevent="goToSellerLogin">卖家中心</a>
-            <a href="#" class="link" @click.prevent="$emit('chat-click')">客户服务</a>
-            <a v-if="authStore.isAuthenticated" href="#" class="link" @click.prevent="$emit('logout-click')">退出登录</a>
+            <a
+              href="#"
+              class="link"
+              @click.prevent="goToSellerLogin"
+            >卖家中心</a>
+            <a
+              href="#"
+              class="link"
+              @click.prevent="$emit('chat-click')"
+            >客户服务</a>
+            <a
+              v-if="authStore.isAuthenticated"
+              href="#"
+              class="link"
+              @click.prevent="$emit('logout-click')"
+            >退出登录</a>
           </div>
         </div>
       </div>
@@ -24,19 +37,28 @@
 
           <div class="search-box">
             <BaseInput
-                v-model="searchQuery"
-                placeholder="搜索怪叽叽..."
-                @enter="handleSearch"
+              v-model="searchQuery"
+              placeholder="搜索怪叽叽..."
+              @enter="handleSearch"
             />
-            <BaseButton @click="handleSearch" size="medium">搜索</BaseButton>
+            <BaseButton
+              @click="handleSearch"
+              size="medium"
+            >搜索</BaseButton>
           </div>
 
           <div class="header-actions">
-            <button class="action-btn" @click="$emit('cart-click')">
+            <button
+              class="action-btn"
+              @click="$emit('cart-click')"
+            >
               <span class="icon">🛒</span>
               <span class="text">购物车</span>
             </button>
-            <button class="action-btn" @click="$emit('orders-click')">
+            <button
+              class="action-btn"
+              @click="$emit('orders-click')"
+            >
               <span class="icon">👤</span>
               <span class="text">我的订单</span>
             </button>
@@ -49,12 +71,21 @@
     <div class="nav-menu">
       <div class="container">
         <nav class="nav-list">
-          <a href="#" class="nav-item active">首页</a>
-          <a href="#" class="nav-item">数码</a>
-          <a href="#" class="nav-item">图书</a>
-          <a href="#" class="nav-item">服饰</a>
-          <a href="#" class="nav-item">家电</a>
-          <a href="#" class="nav-item">游戏</a>
+          <a
+            class="nav-item"
+            @click="handleSelectCategory(0)"
+          >
+            首页
+          </a>
+
+          <a
+            v-for="item in categories"
+            :key="item.id"
+            class="nav-item"
+            @click="handleSelectCategory(item.id)"
+          >
+            {{ item.name }}
+          </a>
         </nav>
       </div>
     </div>
@@ -62,32 +93,57 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import BaseInput  from "@/views/base/BaseInput.vue";
+import { onMounted, ref } from "vue";
+import BaseInput from "@/views/base/BaseInput.vue";
 import BaseButton from "@/views/base/BaseButton.vue";
-import { useRouter } from 'vue-router'
-const router = useRouter()
-import {useAuthStore} from "@/stores/auth.js";
+import { useRouter } from "vue-router";
+const router = useRouter();
+import { useAuthStore } from "@/stores/auth.js";
+import { productApi } from "@/api/business/product";
 const authStore = useAuthStore();
+const categories = ref([]);
+
 const props = defineProps({
   title: {
     type: String,
-    default: '怪叽叽'
-  }
+    default: "怪叽叽",
+  },
 });
 
-const emit = defineEmits(['search', 'cart-click', 'orders-click','chat-click','logout-click']);
+const emit = defineEmits([
+  "search",
+  "cart-click",
+  "orders-click",
+  "chat-click",
+  "logout-click",
+  "handle-category",
+]);
 
-const searchQuery = ref('');
+const searchQuery = ref("");
 
+// 初始化所有分类
+const loadCategories = async () => {
+  try {
+    const res = await productApi.getCategories();
+    categories.value = res.data;
+    console.log(categories.value);
+  } catch (e) {
+    console.error("加载分类失败", e);
+  } finally {
+  }
+};
+
+onMounted(() => {
+  loadCategories();
+});
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
-    emit('search', searchQuery.value);
+    emit("search", searchQuery.value);
   }
 };
 const goToSellerLogin = () => {
-  router.push('/login')
-}
+  router.push("/login");
+};
 </script>
 
 <style scoped>
@@ -99,7 +155,6 @@ const goToSellerLogin = () => {
   z-index: 1000;
   transition: box-shadow 0.3s;
 }
-
 
 .container {
   max-width: 1200px;
@@ -149,6 +204,7 @@ const goToSellerLogin = () => {
 .header-content {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 30px;
 }
 
@@ -161,11 +217,10 @@ const goToSellerLogin = () => {
 .logo h1 {
   font-size: 24px;
   font-weight: bold;
-  color:#667eea;
+  color: #667eea;
   margin: 0;
   line-height: 1;
 }
-
 
 .search-box {
   flex: 1;
@@ -212,7 +267,7 @@ const goToSellerLogin = () => {
 }
 
 .nav-item {
-  color: #333;
+  color: #667eea 0%;
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s;
@@ -221,17 +276,17 @@ const goToSellerLogin = () => {
 
 .nav-item:hover,
 .nav-item.active {
-  color:#667eea;
+  color: #667eea;
 }
 
 .nav-item.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -12px;
   left: 0;
   right: 0;
   height: 2px;
-  background: #667eea;
+  background: #764ba2 100%;
 }
 
 @media (max-width: 768px) {
