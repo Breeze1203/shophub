@@ -1,93 +1,136 @@
 <template>
-  <div class="admin-customer-service">
+  <div class="admin-customer-service fixed-container">
     <div class="sidebar">
       <div class="tabs">
-        <button
-            :class="['tab', { active: activeTab === 'pending' }]"
-            @click="activeTab = 'pending'"
+        <div
+          v-for="tab in ['pending', 'active', 'closed']"
+          :key="tab"
+          :class="['tab', { active: activeTab === tab }]"
+          @click="activeTab = tab"
         >
-          待处理 <span class="badge" v-if="pendingCount">{{ pendingCount }}</span>
-        </button>
-        <button
-            :class="['tab', { active: activeTab === 'active' }]"
-            @click="activeTab = 'active'"
-        >
-          处理中 <span class="badge">{{ activeCount }}</span>
-        </button>
-        <button
-            :class="['tab', { active: activeTab === 'closed' }]"
-            @click="activeTab = 'closed'"
-        >
-          已关闭
-        </button>
+          {{ tabName(tab) }}
+          <span
+            class="badge"
+            v-if="tab === 'pending' && pendingCount > 0"
+          >{{ pendingCount }}</span>
+          <span
+            class="badge-dot"
+            v-else-if="tab === 'active' && activeCount > 0"
+          ></span>
+        </div>
       </div>
 
       <div class="session-list">
         <div
-            v-for="session in filteredSessions"
-            :key="session.id"
-            :class="['session-item', { active: currentSession?.id === session.id }]"
-            @click="selectSession(session)"
+          v-for="session in filteredSessions"
+          :key="session.id"
+          :class="['session-item', { active: currentSession?.id === session.id }]"
+          @click="selectSession(session)"
         >
-          <div class="session-header">
-            <span class="username">{{ session.user.username }}</span>
-            <span class="time">{{ formatTime(session.updated_at) }}</span>
+          <div class="avatar-placeholder">
+            {{ session.user.username.charAt(0).toUpperCase() }}
           </div>
-          <div class="last-message">{{ session.last_message || '暂无消息' }}</div>
-          <span v-if="session.status === 'pending'" class="status-badge">新</span>
+          <div class="session-info">
+            <div class="session-header">
+              <span class="username">{{ session.user.username }}</span>
+              <span class="time">{{ formatTimeShort(session.updated_at) }}</span>
+            </div>
+            <div class="last-message">{{ session.last_message || '暂无消息' }}</div>
+          </div>
+          <span
+            v-if="session.status === 'pending'"
+            class="new-tag"
+          >NEW</span>
         </div>
       </div>
     </div>
 
     <div class="chat-area">
-      <div v-if="!currentSession" class="empty-state">
-        <div class="empty-icon">💬</div>
-        <p>请选择一个会话</p>
+      <div
+        v-if="!currentSession"
+        class="empty-state"
+      >
+        <div class="empty-img">👋</div>
+        <h2>欢迎使用客服系统</h2>
+        <p>请在左侧选择一个会话开始接入</p>
       </div>
 
-      <div v-else class="chat-content">
+      <div
+        v-else
+        class="chat-content"
+      >
         <div class="chat-header">
-          <div class="user-info">
-            <span class="username">{{ currentSession.user.username }}</span>
-            <span class="user-id">ID: {{ currentSession.user.id }}</span>
+          <div class="header-left">
+            <span class="current-username">{{ currentSession.user.username }}</span>
+            <span class="current-id">ID: {{ currentSession.user.id }}</span>
+            <span :class="['status-indicator', currentSession.status]">
+              {{ tabName(currentSession.status) }}
+            </span>
           </div>
           <div class="actions">
             <button
-                v-if="currentSession.status !== 'closed'"
-                @click="closeSession"
-                class="close-session-btn"
+              v-if="currentSession.status !== 'closed'"
+              @click="closeSession"
+              class="btn-danger-outline"
             >
               结束会话
             </button>
           </div>
         </div>
 
-        <!-- 复用聊天消息组件 -->
-        <div class="messages" ref="messagesContainer">
-          <div v-for="msg in messages" :key="msg.id" :class="['message', getMessageClass(msg)]">
-            <div class="message-header">
-              <span class="username" :style="{ color: msg.user_color }">
-                {{ msg.username }}
-              </span>
-              <span class="time">{{ formatTime(msg.created_at) }}</span>
+        <div
+          class="messages"
+          ref="messagesContainer"
+        >
+          <div
+            v-for="msg in messages"
+            :key="msg.id"
+            :class="['message-row', getMessageClass(msg)]"
+          >
+
+            <div
+              v-if="msg.type === 'system'"
+              class="system-message"
+            >
+              <span>{{ msg.content }}</span>
             </div>
-            <div class="message-content">{{ msg.content }}</div>
+
+            <template v-else>
+              <div class="message-avatar">
+                {{ getAvatarName(msg) }}
+              </div>
+              <div class="message-bubble-group">
+                <div class="message-meta">
+                  <span class="msg-name">{{ msg.username }}</span>
+                  <span class="msg-time">{{ formatTime(msg.created_at) }}</span>
+                </div>
+                <div class="message-bubble">
+                  {{ msg.content }}
+                </div>
+              </div>
+            </template>
+
           </div>
         </div>
 
         <div class="input-area">
-          <input
-              v-model="inputMessage"
-              @keypress.enter="sendMessage"
-              placeholder="输入回复..."
-              :disabled="!isConnected || currentSession.status === 'closed'"
-          />
-          <button
+          <textarea
+            v-model="inputMessage"
+            @keydown.enter.prevent="handleEnter"
+            placeholder="输入回复内容，Shift+Enter 换行..."
+            :disabled="!isConnected || currentSession.status === 'closed'"
+            rows="3"
+          ></textarea>
+          <div class="input-actions">
+            <span class="tip">Enter 发送</span>
+            <button
+              class="btn-primary"
               @click="sendMessage"
               :disabled="!isConnected || !inputMessage.trim() || currentSession.status === 'closed'"
-          >
-            发送
-          </button>
+            >
+              发送
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -95,35 +138,76 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue';
-import {useWebSocket} from '@/composables/useWebSocket';
-import {customerApi} from "@/api/admin/customer.js";
-import {chatApi} from "@/api/admin/rooms.js";
-const activeTab = ref('pending');
+import { ref, computed, onMounted, nextTick, watch } from "vue";
+import { useWebSocket } from "@/composables/useWebSocket";
+import { customerApi } from "@/api/admin/customer.js";
+import { chatApi } from "@/api/admin/rooms.js";
+
+const activeTab = ref("pending");
 const sessions = ref([]);
 const currentSession = ref(null);
 const messages = ref([]);
-const inputMessage = ref('');
-const token = localStorage.getItem('access_token');
+const inputMessage = ref("");
+const messagesContainer = ref(null); // 滚动容器引用
+const token = localStorage.getItem("access_token");
 
 let wsConnection = null;
 
+// Tab 名称映射
+const tabName = (status) => {
+  const map = {
+    pending: "待接入",
+    active: "服务中",
+    closed: "已结束",
+  };
+  return map[status] || status;
+};
+
+// 头像显示逻辑
+const getAvatarName = (msg) => {
+  return msg.username ? msg.username.charAt(0).toUpperCase() : "U";
+};
+
 // 筛选会话
 const filteredSessions = computed(() => {
-  return (sessions.value || []).filter(s => s.status === activeTab.value);
+  return (sessions.value || []).filter((s) => s.status === activeTab.value);
 });
 
 const pendingCount = computed(() => {
-  return (sessions.value || []).filter(s => s.status === 'pending').length;
+  return (sessions.value || []).filter((s) => s.status === "pending").length;
 });
 
 const activeCount = computed(() => {
-  return (sessions.value || []).filter(s => s.status === 'active').length;
+  return (sessions.value || []).filter((s) => s.status === "active").length;
 });
 
 const isConnected = computed(() => {
   return wsConnection?.isConnected.value;
 });
+
+// 自动滚动到底部
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    }
+  });
+};
+
+// 监听消息变化，自动滚动
+watch(
+  messages,
+  () => {
+    scrollToBottom();
+  },
+  { deep: true }
+);
+
+// 处理回车发送
+const handleEnter = (e) => {
+  if (e.shiftKey) return; // Shift+Enter 允许换行
+  sendMessage();
+};
 
 // 获取会话列表
 const fetchSessions = async () => {
@@ -131,13 +215,12 @@ const fetchSessions = async () => {
     const response = await customerApi.getSessions();
     sessions.value = response.data.sessions;
   } catch (error) {
-    console.error('获取会话列表失败:', error);
+    console.error("获取会话列表失败:", error);
   }
 };
 
 // 选择会话
-const selectSession = (session) => {
-  // 断开之前的连接
+const selectSession = async (session) => {
   if (wsConnection) {
     wsConnection.disconnect();
   }
@@ -145,133 +228,159 @@ const selectSession = (session) => {
   currentSession.value = session;
   messages.value = [];
 
-  // 连接到该会话的房间
-  wsConnection = useWebSocket(session.room_id, token, 'chat');
+  wsConnection = useWebSocket(session.room_id, token, "chat");
 
-  wsConnection.on('message', (data) => {
+  wsConnection.on("message", (data) => {
     messages.value.push(data);
-  });
-
-  wsConnection.on('init', (data) => {
-    console.log('初始化:', data);
   });
 
   wsConnection.connect();
 
-  // 获取历史消息
-  fetchMessages(session.room_id);
+  await fetchMessages(session.room_id);
+  scrollToBottom(); // 切换会话时滚动到底部
 };
 
-// 获取历史消息
 const fetchMessages = async (roomId) => {
   try {
     const response = await chatApi.getMessages(roomId);
     messages.value = response.data || [];
   } catch (error) {
-    console.error('获取消息失败:', error);
+    console.error("获取消息失败:", error);
   }
 };
 
-// 发送消息
 const sendMessage = () => {
   if (!inputMessage.value.trim() || !wsConnection?.isConnected.value) return;
 
-  wsConnection.send('message', {
-    content: inputMessage.value.trim()
+  // 乐观更新：先推入本地，防止网络延迟感觉卡顿（可选）
+  // 实际开发中通常等待 socket 回调，这里简化直接发送
+  wsConnection.send("message", {
+    content: inputMessage.value.trim(),
   });
 
-  inputMessage.value = '';
+  inputMessage.value = "";
 };
 
-// 关闭会话
 const closeSession = async () => {
   if (!currentSession.value) return;
   try {
     await customerApi.closeSession(currentSession.value.id);
-    currentSession.value.status = 'closed';
-     fetchSessions();
+    currentSession.value.status = "closed";
+    fetchSessions();
   } catch (error) {
-    console.error('关闭会话失败:', error);
+    console.error("关闭会话失败:", error);
   }
 };
 
-// 消息分类
 const getMessageClass = (msg) => {
-  if (msg.type === 'system') return 'system';
-  return msg.user_id === currentSession.value.user_id ? 'user' : 'admin';
+  if (msg.type === "system") return "system";
+  // 假设 currentSession.user_id 是客户ID
+  // 如果 msg.user_id 等于客户ID，就是 user (左边)，否则是 admin (右边)
+  return msg.user_id === currentSession.value.user_id ? "user" : "admin";
 };
 
 const formatTime = (timestamp) => {
   const date = new Date(timestamp);
-  return date.toLocaleString('zh-CN');
+  return date.toLocaleString("zh-CN", { hour: "2-digit", minute: "2-digit" });
 };
 
-// 定时刷新会话列表
+const formatTimeShort = (timestamp) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  if (date.toDateString() === now.toDateString()) {
+    return date.toLocaleTimeString("zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+  return date.toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" });
+};
+
 onMounted(() => {
   fetchSessions();
-  setInterval(fetchSessions, 10000); // 每10秒刷新
+  setInterval(fetchSessions, 10000);
 });
 </script>
 
 <style scoped>
-.admin-customer-service {
+.fixed-container {
   display: flex;
-  height: 80vh;
-  background: #f5f5f5;
+  background: #f0f2f5;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
 }
 
+/* 左侧栏样式 */
 .sidebar {
-  width: 320px;
+  height: 100%;
+  overflow: hidden;
+  width: 280px;
   background: white;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid #e8e8e8;
   display: flex;
   flex-direction: column;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.02);
+  z-index: 2;
 }
 
 .tabs {
   display: flex;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 0 8px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
 }
 
 .tab {
   flex: 1;
-  padding: 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
+  text-align: center;
+  padding: 14px 0;
   font-size: 14px;
   color: #666;
+  cursor: pointer;
   position: relative;
-  transition: color 0.2s;
+  transition: all 0.3s;
 }
 
 .tab:hover {
-  color: #ff6700;
+  color: #1890ff;
 }
 
 .tab.active {
-  color: #ff6700;
+  color: #1890ff;
   font-weight: 500;
 }
 
 .tab.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 20%;
+  right: 20%;
   height: 2px;
-  background: #ff6700;
+  background: #1890ff;
 }
 
-.tab .badge {
-  display: inline-block;
-  padding: 2px 6px;
+.badge {
   background: #ff4d4f;
   color: white;
+  padding: 0 6px;
   border-radius: 10px;
   font-size: 12px;
-  margin-left: 6px;
+  transform: scale(0.8);
+  display: inline-block;
+  vertical-align: top;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  background: #52c41a;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: top;
+  margin-top: 5px;
+  margin-left: 2px;
 }
 
 .session-list {
@@ -280,30 +389,52 @@ onMounted(() => {
 }
 
 .session-item {
-  padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  padding: 12px 16px;
   cursor: pointer;
   transition: background 0.2s;
-  position: relative;
+  border-bottom: 1px solid #f5f5f5;
+  align-items: center;
 }
 
 .session-item:hover {
-  background: #fafafa;
+  background: #f9f9f9;
 }
 
 .session-item.active {
-  background: #fff7e6;
+  background: #e6f7ff; /* 选中态使用淡蓝色 */
+  border-right: 3px solid #1890ff;
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  background: #e6f7ff;
+  color: #1890ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.session-info {
+  flex: 1;
+  overflow: hidden;
 }
 
 .session-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .username {
   font-weight: 500;
   color: #333;
+  font-size: 14px;
 }
 
 .time {
@@ -312,29 +443,31 @@ onMounted(() => {
 }
 
 .last-message {
-  font-size: 13px;
-  color: #666;
+  font-size: 12px;
+  color: #8c8c8c;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.status-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 2px 8px;
-  background: #ff4d4f;
-  color: white;
-  border-radius: 10px;
-  font-size: 12px;
+.new-tag {
+  font-size: 10px;
+  color: #ff4d4f;
+  background: #fff1f0;
+  border: 1px solid #ffa39e;
+  padding: 0 4px;
+  border-radius: 2px;
+  margin-left: 5px;
 }
 
+/* 右侧区域 */
 .chat-area {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: #fff;
+  height: 100%;
+  overflow: hidden;
 }
 
 .empty-state {
@@ -343,129 +476,233 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: #bfbfbf;
+  background: #f0f2f5;
 }
 
-.empty-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-  opacity: 0.5;
+.empty-img {
+  font-size: 48px;
+  margin-bottom: 20px;
 }
 
 .chat-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .chat-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid #e0e0e0;
+  height: 60px;
+  padding: 0 24px;
+  border-bottom: 1px solid #e8e8e8;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #fff;
+  flex-shrink: 0; /* 防止被挤压 */
 }
 
-.user-info {
+.header-left {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: baseline;
+  gap: 10px;
 }
 
-.user-id {
+.current-username {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.current-id {
   font-size: 12px;
-  color: #999;
+  color: #8c8c8c;
 }
 
-.close-session-btn {
+.status-indicator {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+.status-indicator.pending {
+  background: #fffbe6;
+  color: #faad14;
+}
+.status-indicator.active {
+  background: #f6ffed;
+  color: #52c41a;
+}
+.status-indicator.closed {
+  background: #f5f5f5;
+  color: #d9d9d9;
+}
+
+.btn-danger-outline {
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+  background: white;
   padding: 6px 16px;
-  background: #ff4d4f;
-  color: white;
-  border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  transition: all 0.3s;
+}
+.btn-danger-outline:hover {
+  background: #fff1f0;
 }
 
-.close-session-btn:hover {
-  background: #ff7875;
-}
-
+/* 消息区域 - 核心修复 */
 .messages {
   flex: 1;
-  overflow-y: auto;
   padding: 24px;
-  background: #f5f5f5;
-}
-
-.message {
-  margin-bottom: 16px;
-  max-width: 70%;
-}
-
-.message.user {
-  margin-left: 0;
-  margin-right: auto;
-}
-
-.message.admin {
-  margin-left: auto;
-  margin-right: 0;
-}
-
-.message.system {
-  max-width: 100%;
-  text-align: center;
-  color: #999;
-  font-size: 12px;
-}
-
-.message-header {
+  overflow-y: auto; /* 这里需要滚动 */
+  background: #f0f2f5;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 13px;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.message-content {
-  background: white;
-  padding: 12px;
-  border-radius: 8px;
-  line-height: 1.5;
-  word-wrap: break-word;
-}
-
-.input-area {
-  padding: 16px 24px;
-  border-top: 1px solid #e0e0e0;
+.message-row {
   display: flex;
-  gap: 12px;
+  align-items: flex-start;
+  max-width: 80%;
 }
 
-.input-area input {
-  flex: 1;
-  padding: 10px 16px;
-  border: 1px solid #e0e0e0;
+.message-row.user {
+  align-self: flex-start;
+}
+
+/* 管理员（自己）的消息靠右 */
+.message-row.admin {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  width: 36px;
+  height: 36px;
   border-radius: 4px;
+  background: #d9d9d9;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 14px;
+  flex-shrink: 0;
 }
 
-.input-area button {
-  padding: 10px 24px;
-  background: #ff6700;
+.message-row.admin .message-avatar {
+  background: #1890ff;
+  margin-left: 12px;
+}
+
+.message-row.user .message-avatar {
+  background: #faad14;
+  margin-right: 12px;
+}
+
+.message-bubble-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.message-row.admin .message-bubble-group {
+  align-items: flex-end;
+}
+
+.message-meta {
+  font-size: 12px;
+  color: #b0b0b0;
+  margin-bottom: 4px;
+}
+
+.msg-time {
+  margin-left: 8px;
+}
+
+.message-bubble {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+  word-wrap: break-word;
+  max-width: 100%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.message-row.user .message-bubble {
+  background: white;
+  color: #262626;
+  border-top-left-radius: 0;
+}
+
+.message-row.admin .message-bubble {
+  background: #1890ff;
+  color: white;
+  border-top-right-radius: 0;
+}
+
+.system-message {
+  align-self: center;
+  margin: 10px 0;
+}
+.system-message span {
+  background: #e6e6e6;
+  color: #8c8c8c;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+/* 输入区域优化 */
+.input-area {
+  border-top: 1px solid #e8e8e8;
+  padding: 16px 24px;
+  background: white;
+  flex-shrink: 0;
+}
+
+.input-area textarea {
+  width: 100%;
+  border: none;
+  resize: none;
+  outline: none;
+  font-size: 14px;
+  font-family: inherit;
+  color: #262626;
+}
+
+.input-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.tip {
+  font-size: 12px;
+  color: #bfbfbf;
+  margin-right: 12px;
+}
+
+.btn-primary {
+  background: #1890ff;
   color: white;
   border: none;
+  padding: 8px 24px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  transition: all 0.3s;
 }
 
-.input-area button:hover:not(:disabled) {
-  background: #ff8533;
+.btn-primary:hover:not(:disabled) {
+  background: #40a9ff;
 }
 
-.input-area button:disabled {
-  opacity: 0.5;
+.btn-primary:disabled {
+  background: #d9d9d9;
   cursor: not-allowed;
 }
 </style>

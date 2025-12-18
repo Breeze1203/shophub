@@ -52,15 +52,34 @@
               class="action-btn"
               @click="$emit('cart-click')"
             >
-              <span class="icon">🛒</span>
+              <img
+                src="/icons/cart.svg"
+                class="icon"
+                alt="订单图标"
+              />
               <span class="text">购物车</span>
             </button>
             <button
               class="action-btn"
               @click="$emit('orders-click')"
             >
-              <span class="icon">👤</span>
+              <img
+                src="/icons/me.svg"
+                class="icon"
+                alt="订单图标"
+              />
               <span class="text">我的订单</span>
+            </button>
+            <button
+              class="action-btn"
+              @click="$emit('star-click')"
+            >
+              <img
+                src="/icons/star.svg"
+                class="icon"
+                alt="订单图标"
+              />
+              <span class="text">我的收藏</span>
             </button>
           </div>
         </div>
@@ -117,6 +136,7 @@ const emit = defineEmits([
   "chat-click",
   "logout-click",
   "handle-category",
+  "star-click",
 ]);
 
 const searchQuery = ref("");
@@ -252,7 +272,9 @@ const goToSellerLogin = () => {
 }
 
 .action-btn .icon {
-  font-size: 20px;
+  width: 25px;
+  height: 25px;
+  margin-right: 8px;
 }
 
 .action-btn .text {
@@ -274,10 +296,9 @@ const goToSellerLogin = () => {
   position: relative;
 }
 
-.nav-item:hover{
+.nav-item:hover {
   color: #764ba2;
 }
-
 
 @media (max-width: 768px) {
   .top-bar {

@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // 辅助判断是否为扫码类 Provider
     const isQRCodeProvider = (provider) => {
-        return ['en_wechat', 'wechat', 'lark', 'dingtalk'].includes(provider);
+        return ['workchat', 'wechat', 'lark', 'dingtalk'].includes(provider);
     }
 
     // Load providers on init
@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
                 }
             }, 500);
 
-            // 2. 事件监听：接收来自 Callback 页面的 postMessage
+            // 事件监听：接收来自 Callback 页面的 postMessage
             const messageHandler = async (event) => {
                 // 安全检查：确保消息来自当前源（Callback 页面通常与主页同源）
                 if (event.origin !== window.location.origin) return;
