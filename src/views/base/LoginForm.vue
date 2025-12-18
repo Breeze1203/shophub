@@ -125,7 +125,7 @@
 
     <!-- 登录按钮 -->
     <button
-      @click="handleLocalLogin"
+      @click="handleLogin"
       :disabled="loading"
       class="btn-login"
     >
@@ -229,7 +229,7 @@ const props = defineProps({
 // 定义向父组件发送的事件
 const emit = defineEmits(["login"]);
 // 提交处理
-const handleLocalLogin = () => {
+const handleLogin = () => {
   // 将数据打包发给父组件
   emit("login", {
     email: email.value,

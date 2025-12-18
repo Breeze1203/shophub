@@ -274,8 +274,6 @@ const closeSession = async () => {
 
 const getMessageClass = (msg) => {
   if (msg.type === "system") return "system";
-  // 假设 currentSession.user_id 是客户ID
-  // 如果 msg.user_id 等于客户ID，就是 user (左边)，否则是 admin (右边)
   return msg.user_id === currentSession.value.user_id ? "user" : "admin";
 };
 

@@ -176,8 +176,8 @@
             <div class="modal-body">
               <!-- 错误提示 -->
               <div
-                v-if="error"
-                class="error-alert"
+                  v-if="error"
+                  class="error-alert"
               >
                 {{ error }}
               </div>
@@ -254,16 +254,16 @@ const handleLocalLogin = async (data) => {
     data.rememberMe
   );
   if (result.success) {
-    success.value = "登录成功!";
+    isLoginModalVisible.value=false;
   } else {
     error.value = result.error;
   }
   loading.value = false;
 };
+
 const handleRegister = async (formData) => {
   loading.value = true;
   error.value = "";
-  success.value = "";
 
   // 验证密码匹配
   if (formData.password !== formData.confirmPassword) {

@@ -29,7 +29,7 @@
 
             <div v-else :class="['message-bubble', msg.user_id === authStore.user.id ? 'message-right' : 'message-left']">
               <div class="message-header">
-               <span class="username" :style="{ color: msg.user_color }">{{ msg.user_id === authStore.user.id ? msg.username : '客服小助手' }}</span>
+                <span class="username">{{ msg.user_id === authStore.user.id ? msg.username : '客服小助手' }}</span>
                 <span class="time">{{ formatTime(msg.created_at) }}</span>
               </div>
               <div class="message-content">{{ msg.content }}</div>
@@ -341,6 +341,7 @@ defineExpose({
   background: #f5f5f5;
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
 .system-message {
@@ -348,16 +349,28 @@ defineExpose({
   color: #999;
   font-size: 12px;
   padding: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .message-bubble {
   padding: 12px;
-  margin-bottom: 16px;
   max-width: 70%;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  position: relative;
 }
 
+.message-left {
+  align-self: flex-start;
+  background-color: #ffffff;
+  border-top-left-radius: 2px;
+}
+
+.message-right {
+  align-self: flex-end;
+  background-color: #667eea;
+  border-top-right-radius: 2px;
+}
 
 .message-right .message-content {
   color: #fff;
@@ -365,6 +378,7 @@ defineExpose({
 
 .message-right .time {
   color: rgba(255, 255, 255, 0.8);
+  text-align: right;
 }
 
 .message-header {
@@ -375,9 +389,14 @@ defineExpose({
   gap: 10px;
 }
 
+.message-right .message-header {
+  flex-direction: row-reverse;
+}
+
 .username {
   font-weight: 500;
   font-size: 13px;
+  color: #fff;
 }
 
 .time {
