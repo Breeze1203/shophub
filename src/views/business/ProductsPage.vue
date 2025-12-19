@@ -176,8 +176,8 @@
             <div class="modal-body">
               <!-- 错误提示 -->
               <div
-                  v-if="error"
-                  class="error-alert"
+                v-if="error"
+                class="error-alert"
               >
                 {{ error }}
               </div>
@@ -241,6 +241,8 @@ import RegisterForm from "@/views/base/RegisterForm.vue";
 import { useAuthStore } from "@/stores/auth.js";
 const customerServiceRef = ref(null);
 const error = ref("");
+import { useRouter } from "vue-router";
+const router = useRouter();
 import { productApi } from "@/api/business/product";
 
 const authStore = useAuthStore();
@@ -254,7 +256,7 @@ const handleLocalLogin = async (data) => {
     data.rememberMe
   );
   if (result.success) {
-    isLoginModalVisible.value=false;
+    isLoginModalVisible.value = false;
   } else {
     error.value = result.error;
   }
@@ -428,8 +430,8 @@ const mockApi = {
     return new Promise((resolve) => setTimeout(resolve, ms));
   },
 };
-const allCategories=ref([]);
-const currentId=ref(0); //当前分类id
+const allCategories = ref([]);
+const currentId = ref(0); //当前分类id
 const products = ref([]);
 const loading = ref(false);
 const activeCategoryId = ref(null);
@@ -441,12 +443,14 @@ const sortType = ref("default");
 // 计算分类信息
 const categories = computed(() => {
   if (currentId.value === 0) {
-    return allCategories.value.flatMap(cat => cat.children || [])
+    return allCategories.value.flatMap((cat) => cat.children || []);
   } else {
-    const category = allCategories.value.find(cat => cat.id === currentId.value)
-    return category ? (category.children || []) : []
+    const category = allCategories.value.find(
+      (cat) => cat.id === currentId.value
+    );
+    return category ? category.children || [] : [];
   }
-})
+});
 
 // 过滤产品信息
 const filteredProducts = computed(() => {
@@ -498,9 +502,9 @@ const handleSearch = (keyword) => {
 };
 
 // 切换导航分类路由
-const handleCategoryTab=(id)=>{
-  currentId.value = id
-}
+const handleCategoryTab = (id) => {
+  currentId.value = id;
+};
 const handleCategorySelect = (category) => {
   activeCategoryId.value =
     activeCategoryId.value === category.id ? null : category.id;
@@ -540,11 +544,12 @@ const handleCart = () => {
 };
 // 订单路由跳转
 const handleOrders = () => {
-  if (!authStore.isAuthenticated) {
-    isLoginModalVisible.value = true;
-  } else {
-    console.log("跳转到订单页面");
-  }
+  router.push("/orders");
+  // if (!authStore.isAuthenticated) {
+  //   isLoginModalVisible.value = true;
+  // } else {
+  //   console.log("跳转到订单页面");
+  // }
 };
 
 //  登录认证

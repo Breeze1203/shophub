@@ -11,7 +11,7 @@ import HomePage from "@/views/admin/HomePage.vue";
 import ChatRoom from "@/views/admin/ChatRoom.vue";
 import ProductsPage from "@/views/business/ProductsPage.vue";
 import CustomerService from "@/views/admin/CustomerService.vue";
-
+import MyOrders from '@/views/business/orders/MyOrders.vue';
 const routes = [
     {
         path: '/login',
@@ -73,6 +73,14 @@ const routes = [
         meta: {
             requiresAuth: true,
             requiresAdmin: true
+        }
+    },
+    {
+        path: '/orders',
+        name: 'Orders',
+        component: MyOrders,
+        meta: {
+            // requiresAuth: true,
         }
     },
 ];

@@ -23,7 +23,9 @@ export const customerApi = {
     /**
      * 创建会话
      */
-    async createSession() {
-        return await api.post(`/customer/session`);
+    async createSession(sessionType=1) {
+        return await api.post(`/customer/session`,{
+            sessionType:sessionType
+        });
     },
 };

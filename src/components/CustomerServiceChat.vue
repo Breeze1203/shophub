@@ -91,9 +91,9 @@ const { connect, disconnect, send, on, isConnected } = useWebSocket(
 
 
 // 创建或获取会话
-const createSession = async () => {
+const createSession = async (sessionType) => {
   try {
-    const response = await customerApi.createSession();
+    const response = await customerApi.createSession(sessionType);
     sessionId.value = response.data.session.id;
     roomId.value=response.data.session.room_id;
     // 加载历史消息
@@ -136,7 +136,7 @@ const openChat = () => {
   unreadCount.value = 0;
 
   if (!sessionId.value) {
-    createSession();
+    createSession(0);
   }
 };
 // 关闭客服聊天

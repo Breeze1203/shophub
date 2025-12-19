@@ -15,7 +15,7 @@
               href="#"
               class="link"
               @click.prevent="$emit('chat-click')"
-            >客户服务</a>
+            >系统服务</a>
             <a
               v-if="authStore.isAuthenticated"
               href="#"
