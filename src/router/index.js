@@ -12,6 +12,7 @@ import ChatRoom from "@/views/admin/ChatRoom.vue";
 import ProductsPage from "@/views/business/ProductsPage.vue";
 import CustomerService from "@/views/admin/CustomerService.vue";
 import MyOrders from '@/views/business/orders/MyOrders.vue';
+import ShopCart from '@/views/business/cart/ShopCart.vue';
 const routes = [
     {
         path: '/login',
@@ -79,6 +80,14 @@ const routes = [
         path: '/orders',
         name: 'Orders',
         component: MyOrders,
+        meta: {
+            // requiresAuth: true,
+        }
+    },
+    {
+        path: '/cart',
+        name: 'shopcart',
+        component: ShopCart,
         meta: {
             // requiresAuth: true,
         }

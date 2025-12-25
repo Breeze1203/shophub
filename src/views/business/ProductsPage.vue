@@ -536,11 +536,12 @@ const hideRegisterModal = () => {
 
 // 购物车路由跳转
 const handleCart = () => {
-  if (!authStore.isAuthenticated) {
-    isLoginModalVisible.value = true;
-  } else {
-    console.log("跳转到购物车页面");
-  }
+  router.push("/cart")
+  // if (!authStore.isAuthenticated) {
+  //   isLoginModalVisible.value = true;
+  // } else {
+  //   console.log("跳转到购物车页面");
+  // }
 };
 // 订单路由跳转
 const handleOrders = () => {
